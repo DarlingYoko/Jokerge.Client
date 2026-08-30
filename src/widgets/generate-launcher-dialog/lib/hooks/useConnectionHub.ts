@@ -33,9 +33,11 @@ export const useConnectionHub = () => {
   useEffect(() => {
     if (!accessToken) return;
 
+    let connection: HubConnection | undefined;
+
     const onConnectedHub = async () => {
       try {
-        const connection = new HubConnectionBuilder()
+        connection = new HubConnectionBuilder()
           .withUrl(CONNECTION_URL(accessToken), {
             withCredentials: true,
           })
@@ -72,7 +74,7 @@ export const useConnectionHub = () => {
     });
 
     return () => {
-      connectionHub?.stop().then(() => {
+      connection?.stop().then(() => {
         console.log('Success stopping connectionHub');
       });
     };
