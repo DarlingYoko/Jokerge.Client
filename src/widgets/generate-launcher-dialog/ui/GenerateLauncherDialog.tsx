@@ -26,7 +26,7 @@ export function GenerateLauncherDialog() {
   const connectionState = useConnectionHub();
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
       <DialogTrigger asChild>
         <Button size="sm" variant="outline" className="w-fit">
           <Hammer className="mr-2" size={16} />
