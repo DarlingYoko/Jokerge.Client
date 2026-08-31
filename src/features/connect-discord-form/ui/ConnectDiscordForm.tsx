@@ -24,6 +24,8 @@ import { Input } from '@/shared/ui/input';
 import { Separator } from '@/shared/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 import { Alert, AlertDescription } from '@/shared/ui/alert';
+import { Switch } from '@/shared/ui/switch';
+import { Label } from '@/shared/ui/label';
 import discordHint from '@/assets/logos/discord.webp';
 
 interface SignInFormProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -36,6 +38,7 @@ export function ConnectDiscordForm({ className, onOpenChange, ...props }: SignIn
 
   const form = useForm<DiscordFormSchemaType>({
     values: {
+      enabled: Boolean(data?.clientId),
       clientId: data?.clientId || '',
       details: data?.details || '',
       largeImageKey: data?.largeImageKey || '',
@@ -46,8 +49,11 @@ export function ConnectDiscordForm({ className, onOpenChange, ...props }: SignIn
     resolver: zodResolver(integrationSchema),
   });
 
-  const onSubmit: SubmitHandler<DiscordFormSchemaType> = async (data: DiscordFormSchemaType) => {
-    await mutateAsync(data).then(() => {
+  const onSubmit: SubmitHandler<DiscordFormSchemaType> = async ({
+    enabled: isEnabled,
+    ...values
+  }: DiscordFormSchemaType) => {
+    await mutateAsync({ ...values, clientId: isEnabled ? values.clientId : '' }).then(() => {
       onOpenChange(false);
     });
   };
@@ -93,12 +99,45 @@ export function ConnectDiscordForm({ className, onOpenChange, ...props }: SignIn
             <form className="flex flex-col space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
               <Card className="border-l-4 border-l-primary">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-base">Основные настройки</CardTitle>
-                  <CardDescription>
-                    Настройте основные параметры для подключения к Discord
-                  </CardDescription>
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <CardTitle className="text-base">Основные настройки</CardTitle>
+                      <CardDescription>
+                        Настройте основные параметры для подключения к Discord
+                      </CardDescription>
+                    </div>
+                    <FormField
+                      control={form.control}
+                      name="enabled"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center gap-2 space-y-0">
+                          <Label htmlFor="discord-enabled" className="text-sm text-muted-foreground">
+                            {field.value ? 'Включено' : 'Отключено'}
+                          </Label>
+                          <FormControl>
+                            <Switch
+                              id="discord-enabled"
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {!form.watch('enabled') && form.watch('clientId') && (
+                    <Alert className="bg-amber-50 border-amber-200 dark:bg-amber-950 dark:border-amber-900">
+                      <InfoIcon className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                      <AlertDescription className="text-sm text-amber-600 dark:text-amber-400">
+                        При сохранении Client ID будет удалён, и Rich Presence перестанет
+                        отображаться. Чтобы включить интеграцию снова, потребуется ввести Client ID
+                        заново.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
                   <FormField
                     control={form.control}
                     name="clientId"
@@ -108,7 +147,11 @@ export function ConnectDiscordForm({ className, onOpenChange, ...props }: SignIn
                         <FormControl>
                           <div className="relative">
                             <LinkIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                            <Input className="pl-10" placeholder="Введите Client ID вашего Discord приложения" {...field} />
+                            <Input
+                              className="pl-10"
+                              placeholder="Введите Client ID вашего Discord приложения"
+                              {...field}
+                            />
                           </div>
                         </FormControl>
                         <FormDescription>
@@ -128,7 +171,11 @@ export function ConnectDiscordForm({ className, onOpenChange, ...props }: SignIn
                         <FormControl>
                           <div className="relative">
                             <TextIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                            <Input className="pl-10" placeholder="Например: Играет на сервере" {...field} />
+                            <Input
+                              className="pl-10"
+                              placeholder="Например: Играет на сервере"
+                              {...field}
+                            />
                           </div>
                         </FormControl>
                         <FormDescription>
@@ -159,7 +206,11 @@ export function ConnectDiscordForm({ className, onOpenChange, ...props }: SignIn
                           <FormControl>
                             <div className="relative">
                               <ImageIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                              <Input className="pl-10" placeholder="Ключ большого изображения" {...field} />
+                              <Input
+                                className="pl-10"
+                                placeholder="Ключ большого изображения"
+                                {...field}
+                              />
                             </div>
                           </FormControl>
                           <FormDescription>
@@ -179,7 +230,11 @@ export function ConnectDiscordForm({ className, onOpenChange, ...props }: SignIn
                           <FormControl>
                             <div className="relative">
                               <TextIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                              <Input className="pl-10" placeholder="Текст при наведении на большое изображение" {...field} />
+                              <Input
+                                className="pl-10"
+                                placeholder="Текст при наведении на большое изображение"
+                                {...field}
+                              />
                             </div>
                           </FormControl>
                           <FormDescription>
@@ -203,7 +258,11 @@ export function ConnectDiscordForm({ className, onOpenChange, ...props }: SignIn
                           <FormControl>
                             <div className="relative">
                               <ImageIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                              <Input className="pl-10" placeholder="Ключ маленького изображения" {...field} />
+                              <Input
+                                className="pl-10"
+                                placeholder="Ключ маленького изображения"
+                                {...field}
+                              />
                             </div>
                           </FormControl>
                           <FormDescription>
@@ -223,7 +282,11 @@ export function ConnectDiscordForm({ className, onOpenChange, ...props }: SignIn
                           <FormControl>
                             <div className="relative">
                               <TextIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                              <Input className="pl-10" placeholder="Текст при наведении на маленькое изображение" {...field} />
+                              <Input
+                                className="pl-10"
+                                placeholder="Текст при наведении на маленькое изображение"
+                                {...field}
+                              />
                             </div>
                           </FormControl>
                           <FormDescription>
