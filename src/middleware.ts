@@ -27,7 +27,18 @@ const protectedRoutes = [
 ];
 const publicRoutes = ['/', AUTH_PAGES.HOME, AUTH_PAGES.SIGN_IN];
 
-async function attemptRefresh(request: NextRequest): Promise<string | null> {
+interface RefreshResult {
+  accessToken: string;
+  // The backend rotates the refresh token on every successful call (old one revoked, new one
+  // issued). This is a plain server-to-server fetch, so the browser never sees that Set-Cookie
+  // on its own — it has to be forwarded manually onto the response we hand back, or the browser
+  // keeps sending the now-revoked refresh token on its next refresh and gets bounced to sign-in
+  // even though the session was never actually lost (this is the "long AFK, then blinks back to
+  // login" symptom: the very first silent refresh works, but every one after it fails).
+  setCookies: string[];
+}
+
+async function attemptRefresh(request: NextRequest): Promise<RefreshResult | null> {
   try {
     // Call backend refresh using existing HttpOnly cookies
     const refreshUrl = new URL('/api/v1/users/refresh', request.url);
@@ -39,7 +50,16 @@ async function attemptRefresh(request: NextRequest): Promise<string | null> {
     if (!res.ok) return null;
     const json: any = await res.json();
     const token = json?.data?.accessToken ?? json?.accessToken;
-    return typeof token === 'string' && token.length > 0 ? token : null;
+    if (typeof token !== 'string' || token.length === 0) return null;
+
+    const setCookies =
+      typeof (res.headers as any).getSetCookie === 'function'
+        ? (res.headers as any).getSetCookie()
+        : res.headers.get('set-cookie')
+          ? [res.headers.get('set-cookie')!]
+          : [];
+
+    return { accessToken: token, setCookies };
   } catch {
     return null;
   }
@@ -68,10 +88,15 @@ export async function middleware(request: NextRequest) {
 
   // 1) Protected routes: try server-side refresh before redirecting to sign-in
   if (isProtectedRoute && safeIsExpired(accessToken)) {
-    const newToken = hasRefresh ? await attemptRefresh(request) : null;
-    if (newToken) {
+    const refreshed = hasRefresh ? await attemptRefresh(request) : null;
+    if (refreshed) {
       const response = NextResponse.next();
-      response.cookies.set('accessToken', newToken, accessTokenCookieOptions(newToken));
+      response.cookies.set(
+        'accessToken',
+        refreshed.accessToken,
+        accessTokenCookieOptions(refreshed.accessToken),
+      );
+      for (const cookie of refreshed.setCookies) response.headers.append('set-cookie', cookie);
       return response;
     }
 
@@ -83,10 +108,15 @@ export async function middleware(request: NextRequest) {
 
   // 2) Public routes (auth pages): if we can refresh, redirect into app
   if (isPublicRoute && safeIsExpired(accessToken)) {
-    const newToken = hasRefresh ? await attemptRefresh(request) : null;
-    if (newToken) {
+    const refreshed = hasRefresh ? await attemptRefresh(request) : null;
+    if (refreshed) {
       const redirect = NextResponse.redirect(new URL(DASHBOARD_PAGES.HOME, request.nextUrl));
-      redirect.cookies.set('accessToken', newToken, accessTokenCookieOptions(newToken));
+      redirect.cookies.set(
+        'accessToken',
+        refreshed.accessToken,
+        accessTokenCookieOptions(refreshed.accessToken),
+      );
+      for (const cookie of refreshed.setCookies) redirect.headers.append('set-cookie', cookie);
       return redirect;
     }
   }
