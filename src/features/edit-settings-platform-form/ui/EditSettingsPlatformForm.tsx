@@ -24,6 +24,16 @@ import {Skeleton} from '@/shared/ui/skeleton';
 import curseforge from '@/assets/logos/curseforge.ico';
 import vk from '@/assets/logos/vk.svg';
 
+// Must match the `value`s of the SelectItem options below. The backend stores this as a
+// non-nullable TimeSpan, so submitting anything outside this set (e.g. the "00:00:00" left
+// over from before Sentry auto-clear existed) fails server-side JSON parsing for the whole
+// settings payload, silently blocking the save of every field on this form.
+const SENTRY_AUTO_CLEAR_PERIODS = [
+  '00:01:00', '00:05:00', '00:10:00', '00:15:00', '00:30:00',
+  '01:00:00', '02:00:00', '12:00:00', '1.00:00:00', '7.00:00:00',
+];
+const DEFAULT_SENTRY_AUTO_CLEAR_PERIOD = '00:05:00';
+
 export const EditSettingsPlatformForm: React.FC<{ showOnlyApiKeys?: boolean }> = ({showOnlyApiKeys = false}) => {
   const {data: platform, isLoading} = useSettingsPlatform();
   const {mutateAsync, isPending} = useEditSettingsPlatform();
@@ -41,7 +51,7 @@ export const EditSettingsPlatformForm: React.FC<{ showOnlyApiKeys?: boolean }> =
       storageLogin: '',
       storagePassword: '',
       sentryNeedAutoClear: false,
-      sentryAutoClearPeriod: '00:05:00',
+      sentryAutoClearPeriod: DEFAULT_SENTRY_AUTO_CLEAR_PERIOD,
     },
   });
 
@@ -57,7 +67,9 @@ export const EditSettingsPlatformForm: React.FC<{ showOnlyApiKeys?: boolean }> =
         storagePassword: '',
         textureProtocol: platform.textureProtocol,
         sentryNeedAutoClear: platform.sentryNeedAutoClear ?? false,
-        sentryAutoClearPeriod: platform.sentryAutoClearPeriod || '00:05:00',
+        sentryAutoClearPeriod: SENTRY_AUTO_CLEAR_PERIODS.includes(platform.sentryAutoClearPeriod)
+          ? platform.sentryAutoClearPeriod
+          : DEFAULT_SENTRY_AUTO_CLEAR_PERIOD,
       });
     }
   }, [platform, isLoading, form]);
