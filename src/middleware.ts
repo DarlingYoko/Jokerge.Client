@@ -1,7 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { AUTH_PAGES, DASHBOARD_PAGES } from '@/shared/routes';
-import { isTokenExpired } from '@/shared/lib/utils';
+import { getTokenExpiredTime, isTokenExpired } from '@/shared/lib/utils';
+
+// Bounds the server-side refresh call so a slow/unreachable API doesn't stall every protected
+// page navigation for the whole fetch timeout — fail fast to sign-in instead.
+const REFRESH_FETCH_TIMEOUT_MS = 5000;
+
+function accessTokenCookieOptions(newToken: string) {
+  const expSeconds = getTokenExpiredTime(newToken);
+  return {
+    path: '/' as const,
+    sameSite: 'lax' as const,
+    ...(expSeconds ? { expires: new Date(expSeconds * 1000) } : {}),
+  };
+}
 
 const protectedRoutes = [
   DASHBOARD_PAGES.HOME,
@@ -21,6 +34,7 @@ async function attemptRefresh(request: NextRequest): Promise<string | null> {
     const res = await fetch(refreshUrl, {
       method: 'GET',
       headers: { cookie: request.headers.get('cookie') ?? '' },
+      signal: AbortSignal.timeout(REFRESH_FETCH_TIMEOUT_MS),
     });
     if (!res.ok) return null;
     const json: any = await res.json();
@@ -57,7 +71,7 @@ export async function middleware(request: NextRequest) {
     const newToken = hasRefresh ? await attemptRefresh(request) : null;
     if (newToken) {
       const response = NextResponse.next();
-      response.cookies.set('accessToken', newToken, { path: '/', sameSite: 'lax' });
+      response.cookies.set('accessToken', newToken, accessTokenCookieOptions(newToken));
       return response;
     }
 
@@ -72,7 +86,7 @@ export async function middleware(request: NextRequest) {
     const newToken = hasRefresh ? await attemptRefresh(request) : null;
     if (newToken) {
       const redirect = NextResponse.redirect(new URL(DASHBOARD_PAGES.HOME, request.nextUrl));
-      redirect.cookies.set('accessToken', newToken, { path: '/', sameSite: 'lax' });
+      redirect.cookies.set('accessToken', newToken, accessTokenCookieOptions(newToken));
       return redirect;
     }
   }

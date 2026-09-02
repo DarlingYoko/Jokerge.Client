@@ -39,7 +39,7 @@ const base64UrlDecode = (input: string): string => {
   }
 };
 
-const getTokenExpiredTime = (token: string) => {
+export const getTokenExpiredTime = (token: string) => {
   const tokenParts = token.split('.');
   try {
     const json = base64UrlDecode(tokenParts[1] ?? '');
