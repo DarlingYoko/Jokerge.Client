@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { getStorageAccessToken } from '@/shared/services';
@@ -7,6 +8,7 @@ import { JavaVersionBaseEntity, ProfileExtendedBaseEntity } from '@/shared/api/c
 import { getApiBaseUrl } from '@/shared/lib/utils';
 import { useProfileCardStore } from '@/entities/ProfileCard/lib/store';
 import { EntityState } from '@/shared/enums';
+import { profileKeys } from '@/shared/hooks/useProfiles';
 
 interface ConnectionHubProps {
   profile?: ProfileExtendedBaseEntity;
@@ -34,6 +36,18 @@ export const useConnectionHub = (props: ConnectionHubProps) => {
   const [isPacked, setIsPacked] = useState(false);
 
   const { setState: setProfileCardState } = useProfileCardStore();
+  const queryClient = useQueryClient();
+
+  // The profile badge is normally kept in sync by the SignalR push events below, but that push
+  // can be missed entirely (connection dropped mid-build, tab switched away and this component
+  // unmounted, a proxy idle-timeout, etc.), leaving the badge stuck on a stale state forever even
+  // though the server finished. Re-pulling the real profile state from the REST API is a
+  // failure-tolerant backstop that self-corrects regardless of what happened to the socket.
+  const resyncProfile = () => {
+    if (profile?.profileName) {
+      queryClient.invalidateQueries({ queryKey: profileKeys.detail(profile.profileName) });
+    }
+  };
 
   useEffect(() => {
     if (isLoading || !accessToken) return;
@@ -51,6 +65,10 @@ export const useConnectionHub = (props: ConnectionHubProps) => {
         await connection.start();
 
         if (connection.state == 'Connected') setIsConnected(true);
+
+        // Correct any staleness accumulated while this connection wasn't around to receive the
+        // completion event (e.g. the user was away from this tab while a build finished).
+        resyncProfile();
 
         if (profile?.hasUpdate == false) setIsRestoring(true);
 
@@ -102,6 +120,7 @@ export const useConnectionHub = (props: ConnectionHubProps) => {
             setPercentStage(0);
             setPercentAllStages(0);
             setLogs(null);
+            resyncProfile();
             toast.success('Успешно', {
               description: `Профиль ${profileName} успешно загружен`,
             });
@@ -115,6 +134,7 @@ export const useConnectionHub = (props: ConnectionHubProps) => {
             setIsRestoring(false);
             setPercentStage(0);
             setLogs(null);
+            resyncProfile();
           }
 
           toast.success('Успешно', {
@@ -154,6 +174,7 @@ export const useConnectionHub = (props: ConnectionHubProps) => {
       .finally(() => {
         setIsRestoring(false);
         setProfileCardState(EntityState.ENTITY_STATE_NEED_COMPILE);
+        resyncProfile();
       });
   };
 
@@ -178,6 +199,7 @@ export const useConnectionHub = (props: ConnectionHubProps) => {
       .finally(() => {
         setIsRestoring(false);
         setProfileCardState(EntityState.ENTITY_STATE_LOADING);
+        resyncProfile();
       });
   };
 
@@ -203,6 +225,7 @@ export const useConnectionHub = (props: ConnectionHubProps) => {
       .finally(() => {
         setProfileCardState(EntityState.ENTITY_STATE_ACTIVE);
         setIsRestoring(false);
+        resyncProfile();
       });
   };
 
