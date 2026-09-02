@@ -11,6 +11,9 @@ export function QueryProvider({ children }: PropsWithChildren) {
         queries: {
           refetchOnWindowFocus: false,
           retry: false,
+          // Without this, every remount (tab switch, dialog open/close, back/forward nav) refetched
+          // data that had just loaded, since the default staleTime is 0.
+          staleTime: 30_000,
         },
       },
     }),

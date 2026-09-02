@@ -55,7 +55,6 @@ export function PlayersTable() {
     isError,
     error,
     fetchNextPage,
-    refetch,
   } = usePlayers(debouncedFilters);
 
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -108,6 +107,8 @@ export function PlayersTable() {
 
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    // setDebouncedFilters alone changes the query key and triggers the refetch — an explicit
+    // refetch() here fired a second, redundant request (against the stale pre-update filters).
     setDebouncedFilters({
       findName: search.trim() || undefined,
       findUuid: uuid.trim() || undefined,
@@ -119,7 +120,6 @@ export function PlayersTable() {
       sortDesc,
       take,
     } as any);
-    refetch();
   };
 
   return (

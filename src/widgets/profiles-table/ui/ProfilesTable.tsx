@@ -52,8 +52,6 @@ export function ProfilesTable() {
     isPendingDelete: deleteMutation.isPending,
   });
 
-  //console.log(profiles);
-
   const onProfileDelete =
     ({ profileName, removeFiles }: { profileName: string; removeFiles: boolean }) =>
     async () => {

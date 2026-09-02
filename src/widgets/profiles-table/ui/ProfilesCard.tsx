@@ -58,8 +58,6 @@ export function ProfilesCard() {
     isPendingDelete: deleteMutation.isPending,
   });
 
-  //console.log(profiles);
-
   const onProfileDelete =
     ({ profileName, removeFiles }: { profileName: string; removeFiles: boolean }) =>
     async () => {

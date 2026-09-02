@@ -47,7 +47,18 @@ import { GameMods } from '@/widgets/game-mods';
 export const ProfilePage = ({ params }: { params: { name: string } }) => {
   const account = getStorageProfile();
   const accessToken = getStorageAccessToken();
-  const { data, mutate, isPending } = useProfile();
+  const { data, isPending } = useProfile(
+    account && accessToken
+      ? {
+          UserName: account.name,
+          ProfileName: decodeURIComponent(params.name),
+          UserAccessToken: accessToken,
+          UserUuid: 'uuid',
+          OsArchitecture: OsArchitectureEnum.X64,
+          OsType: OsTypeEnum.WINDOWS.toString(),
+        }
+      : undefined,
+  );
   const { setPlayers } = useGamePlayerStore();
   const profile = data?.data.data;
   const router = useRouter();
@@ -58,19 +69,6 @@ export const ProfilePage = ({ params }: { params: { name: string } }) => {
 
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [activeTab, setActiveTab] = useState<string>(searchParams.get('tab') || 'main');
-
-  useEffect(() => {
-    if (account && accessToken) {
-      mutate({
-        UserName: account.name,
-        ProfileName: decodeURIComponent(params.name),
-        UserAccessToken: accessToken,
-        UserUuid: 'uuid',
-        OsArchitecture: OsArchitectureEnum.X64,
-        OsType: OsTypeEnum.WINDOWS.toString(),
-      });
-    }
-  }, []);
 
   useEffect(() => {
     if (profile !== undefined) {

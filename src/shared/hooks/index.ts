@@ -1,5 +1,6 @@
 export * from './useAuthorization';
 export * from './useIntegrations';
+export * from './useMediaQuery';
 export * from './useNotification';
 export * from './useProfiles';
 export * from './useSentry';

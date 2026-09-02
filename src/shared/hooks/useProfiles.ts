@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { AxiosResponse, isAxiosError as isAxiosErrorBase } from 'axios';
 import {
   useMutation,
@@ -42,6 +43,7 @@ export const profileKeys = {
   addingModsByUrl: () => [...profileKeys.all, 'addingModsByUrl'] as const,
 
   entities: () => [...profileKeys.all, 'entities'] as const,
+  detail: (name: string) => [...profileKeys.entities(), 'detail', name] as const,
 
   javaVerison: () => [...profileKeys.all, 'javaVerison'] as const,
   gameVersions: (version: string) => [...profileKeys.entities(), version, 'versions'] as const,
@@ -55,31 +57,36 @@ export const useProfiles = () => {
   });
 };
 
-export const useProfile = () => {
+// Cached by profile name so revisiting a profile page (back/forward nav, tab switches) is instant
+// instead of re-fetching from scratch every time — this used to be a useMutation fired from a mount
+// effect, which meant no caching at all and a blank page on every navigation.
+export const useProfile = (params?: TGetProfileRequest) => {
   const { setState } = useProfileCardStore();
-
   const route = useRouter();
-  const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationKey: [...profileKeys.reading()],
-    mutationFn: (data: TGetProfileRequest) => profileService.getProfile(data),
-    onSettled: async () => {
-      await queryClient.invalidateQueries({ queryKey: profileKeys.all });
-    },
-    onSuccess: async (data) => {
-      setState(data.data.data.state);
-    },
-    onError: (error) => {
-      isAxiosError({ toast, error });
-
-      if (isAxiosErrorBase(error)) {
-        if (error.response && error.response.status === 404) {
-          route.push('/dashboard/profiles');
-        }
-      }
-    },
+  const query = useQuery({
+    queryKey: profileKeys.detail(params?.ProfileName ?? ''),
+    queryFn: () => profileService.getProfile(params!),
+    enabled: !!params,
   });
+
+  useEffect(() => {
+    if (query.data) {
+      setState(query.data.data.data.state);
+    }
+  }, [query.data, setState]);
+
+  useEffect(() => {
+    if (query.error) {
+      isAxiosError({ toast, error: query.error });
+
+      if (isAxiosErrorBase(query.error) && query.error.response?.status === 404) {
+        route.push('/dashboard/profiles');
+      }
+    }
+  }, [query.error, route]);
+
+  return query;
 };
 
 export const useCurrentProfile = () => {
