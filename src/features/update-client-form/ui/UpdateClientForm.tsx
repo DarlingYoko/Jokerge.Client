@@ -51,7 +51,7 @@ export function UpdateClientForm({ className, onOpenChange, ...props }: UpdateCl
               <FormItem className="flex-1">
                 <FormLabel>Выберите версию билда</FormLabel>
                 <FormControl>
-                  <Select onValueChange={field.onChange} defaultValue={field.value} modal={false}>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <SelectTrigger>
                       <SelectValue placeholder="Выберите версию билда"/>
                     </SelectTrigger>
