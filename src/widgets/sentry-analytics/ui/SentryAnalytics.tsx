@@ -47,9 +47,9 @@ export const SentryAnalytics = () => {
 
   const { data, mutate, isPending } = useSentryFilterErrorsList();
 
-  const [tab, setTab] = useState<AnalyticsInterval>(
-    AnalyticsInterval.ANALYTICS_INTERVAL_FIVE_MINUTES,
-  );
+  // Defaulting to a 5-minute window meant this tab almost always opened to "no data" even when
+  // the Stats tab showed hundreds of errors overall — a broad default actually shows something.
+  const [tab, setTab] = useState<AnalyticsInterval>(AnalyticsInterval.ANALYTICS_INTERVAL_MONTH);
   const handleChangeTab = (currentTab: string) => setTab(currentTab as AnalyticsInterval);
 
   useEffect(() => {
