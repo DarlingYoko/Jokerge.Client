@@ -38,6 +38,10 @@ export const LoginPluginScriptViewer = () => {
         setError(null);
 
         const response = await PluginRegistry.getPluginScriptByPlace(PluginPlace.AfterLoginForm);
+        if (!response) {
+          // No plugin registered for this place — nothing to render, nothing to report.
+          return;
+        }
         setScriptContent(response.data);
 
         // Try to evaluate and render the script content if it contains React components

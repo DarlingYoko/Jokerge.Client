@@ -27,7 +27,7 @@ export class PluginRegistry {
    * @param place - The place where the plugin script will be rendered
    * @returns Promise with the plugin script response
    */
-  static async getPluginScriptByPlace(place: PluginPlace): Promise<PluginScriptResponse> {
+  static async getPluginScriptByPlace(place: PluginPlace): Promise<PluginScriptResponse | null> {
     try {
       // Create an AbortController to timeout the request
       const controller = new AbortController();
@@ -63,6 +63,10 @@ export class PluginRegistry {
 
       // Check if the response is successful
       if (!response.ok) {
+        // No plugin is registered for this place — the expected, common case, not a failure.
+        if (response.status === 404) {
+          return null;
+        }
         // Handle 401 Unauthorized specifically
         if (response.status === 401) {
           throw new Error('UNAUTHORIZED: Authentication required');
