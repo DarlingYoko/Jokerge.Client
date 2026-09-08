@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 
 import { getStorageAccessToken } from '@/shared/services/AuthTokenService';
-import { getApiBaseUrl } from '@/views/marketplace/api/plugins';
+import { getApiBaseUrl } from '@/shared/api/getApiBaseUrl';
 
 export function GmlContextInitializer() {
   useEffect(() => {

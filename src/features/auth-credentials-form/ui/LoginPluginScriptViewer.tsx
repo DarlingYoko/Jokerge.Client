@@ -1,82 +1,52 @@
 'use client';
 
-import { ReactNode, useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
-import dynamic from 'next/dynamic';
 
-import { PluginPlace, PluginRegistry } from '@/views/marketplace/api/pluginRegistry';
+import { PluginPlace, PluginRegistry } from '@/shared/api/pluginRegistry';
 
-// Dynamic import for React components that might be in the script
-const DynamicComponent = dynamic(
-  () =>
-    Promise.resolve(
-      ({
-        component: Component,
-        ...props
-      }: {
-        component: React.ComponentType;
-        [key: string]: any;
-      }) => {
-        return <Component {...props} />;
-      },
-    ),
-  {
-    ssr: false,
-  },
-);
-
+// The plugin script is admin-installed, untrusted third-party content shown to every
+// visitor on the public sign-in page. It used to be run via `new Function(...)` directly
+// in this page's own context — arbitrary JS with full access to the login page's DOM,
+// cookies, and localStorage. It now runs inside a sandboxed iframe instead: `allow-scripts`
+// without `allow-same-origin` puts it in an opaque origin that can't reach anything of ours.
+// Contract change: a plugin script is now plain JS/HTML that renders into its own document
+// body (e.g. `document.body.innerHTML = '...'`), not a React component factory.
 export const LoginPluginScriptViewer = () => {
   const [scriptContent, setScriptContent] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [renderedComponent, setRenderedComponent] = useState<ReactNode | null>(null);
+  const [height, setHeight] = useState(0);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     const fetchPluginScript = async () => {
       try {
-        setIsLoading(true);
-        setError(null);
-
         const response = await PluginRegistry.getPluginScriptByPlace(PluginPlace.AfterLoginForm);
         if (!response) {
           // No plugin registered for this place — nothing to render, nothing to report.
           return;
         }
         setScriptContent(response.data);
-
-        // Try to evaluate and render the script content if it contains React components
-        try {
-          // This is a simplified approach - in a real implementation, you would need
-          // a more robust way to safely evaluate and render external JS code
-          const evalScript = new Function('React', 'return ' + response.data);
-          const Component = evalScript(require('react'));
-
-          if (typeof Component === 'function') {
-            // If the script returns a React component
-            setRenderedComponent(<DynamicComponent component={Component} />);
-          } else {
-            // If it's not a component, just display the script
-            setRenderedComponent(null);
-          }
-        } catch (evalError) {
-          console.warn('Could not evaluate script as React component:', evalError);
-          // If evaluation fails, we'll just display the raw script
-          setRenderedComponent(null);
-        }
       } catch (error) {
         console.error('Error fetching plugin script:', error);
         setError(error instanceof Error ? error.message : 'Failed to load plugin script');
-      } finally {
-        setIsLoading(false);
       }
     };
 
     fetchPluginScript();
   }, []);
 
-  if (isLoading || !scriptContent) {
-    return null; // Don't show anything while loading
-  }
+  useEffect(() => {
+    const onMessage = (event: MessageEvent) => {
+      if (event.source !== iframeRef.current?.contentWindow) return;
+      if (event.data?.type === 'plugin-resize' && typeof event.data.height === 'number') {
+        setHeight(event.data.height);
+      }
+    };
+
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, []);
 
   if (error) {
     return (
@@ -87,6 +57,31 @@ export const LoginPluginScriptViewer = () => {
     );
   }
 
-  // Only render if we have a component to render
-  return renderedComponent ? <>{renderedComponent}</> : null;
+  if (!scriptContent) {
+    return null; // Nothing loaded (yet), don't show anything.
+  }
+
+  const srcDoc = `<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0">
+<script>
+try {
+  ${scriptContent}
+} catch (e) {
+  console.error('Plugin script error:', e);
+}
+new ResizeObserver(() => {
+  parent.postMessage({ type: 'plugin-resize', height: document.body.scrollHeight }, '*');
+}).observe(document.body);
+</script>
+</body></html>`;
+
+  return (
+    <iframe
+      ref={iframeRef}
+      title="login-plugin"
+      sandbox="allow-scripts"
+      srcDoc={srcDoc}
+      className="w-full border-0"
+      style={{ height }}
+    />
+  );
 };
