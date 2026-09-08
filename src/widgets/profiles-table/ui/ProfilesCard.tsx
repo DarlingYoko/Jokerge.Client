@@ -32,7 +32,7 @@ import { Label } from '@/shared/ui/label';
 import { Switch } from '@/shared/ui/switch';
 import { Separator } from '@/shared/ui/separator';
 import { convertApiGameLoaderImage } from '@/shared/converters';
-import { ClientState } from '@/widgets/client-hub';
+import { ClientState } from '@/shared/ui/ClientState';
 import { Button } from '@/shared/ui/button';
 import { DASHBOARD_PAGES } from '@/shared/routes';
 

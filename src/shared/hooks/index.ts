@@ -1,4 +1,5 @@
 export * from './useAuthorization';
+export * from './useGenerateLauncherConnectionHub';
 export * from './useIntegrations';
 export * from './useMediaQuery';
 export * from './useNotification';

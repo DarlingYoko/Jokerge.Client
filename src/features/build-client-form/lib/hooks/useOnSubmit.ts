@@ -3,11 +3,11 @@ import { toast } from 'sonner';
 
 import { ClientBuildFormSchemaType } from '../static';
 
-import { useConnectionHub } from '@/widgets/generate-launcher-dialog';
+import { useGenerateLauncherConnectionHub } from '@/shared/hooks';
 
 interface UseOnSubmitBuildParams {
-  connectionHub: ReturnType<typeof useConnectionHub>['connectionHub'];
-  state: ReturnType<typeof useConnectionHub>['build'];
+  connectionHub: ReturnType<typeof useGenerateLauncherConnectionHub>['connectionHub'];
+  state: ReturnType<typeof useGenerateLauncherConnectionHub>['build'];
   version: string;
 }
 

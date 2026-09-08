@@ -6,7 +6,7 @@ import classes from './styles.module.css';
 
 import { config } from '@/core/configs';
 import { ChangeTheme } from '@/features/change-theme';
-import { Notifications } from '@/features/notifications';
+import { Notifications } from '@/widgets/notifications-dropdown';
 import { DesktopNavigation } from '@/shared/ui/DesktopNavigation';
 import { MobileNavigation } from '@/shared/ui/MobileNavigation';
 import { AccountNavigation } from '@/shared/ui/AccountNavigation';

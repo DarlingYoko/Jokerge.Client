@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { getStorageAccessToken } from '@/shared/services';
 import { JavaVersionBaseEntity, ProfileExtendedBaseEntity } from '@/shared/api/contracts';
 import { getApiBaseUrl } from '@/shared/lib/utils';
-import { useProfileCardStore } from '@/entities/ProfileCard/lib/store';
+import { useProfileCardStore } from '@/shared/store/profileCardStore';
 import { EntityState } from '@/shared/enums';
 import { profileKeys } from '@/shared/hooks/useProfiles';
 

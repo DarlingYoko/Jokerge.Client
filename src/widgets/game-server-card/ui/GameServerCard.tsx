@@ -1,7 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 
-import { ClientState } from '@/widgets/client-hub';
+import { ClientState } from '@/shared/ui/ClientState';
 import { DeleteGameServerDialog } from '@/features/delete-game-server';
 import { EditGameServerDialog } from '@/features/edit-game-server';
 import { GameServerBaseEntity } from '@/shared/api/contracts';

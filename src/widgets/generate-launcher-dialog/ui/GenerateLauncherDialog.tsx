@@ -3,11 +3,10 @@
 import { useState } from 'react';
 import { Hammer } from 'lucide-react';
 
-import { useConnectionHub } from '../lib/hooks/useConnectionHub';
-
 import { DownloadClientForm } from '@/features/download-client-form';
 import { BuildClientForm } from '@/features/build-client-form';
 import { UpdateClientForm } from '@/features/update-client-form';
+import { useGenerateLauncherConnectionHub } from '@/shared/hooks';
 import {
   Dialog,
   DialogContent,
@@ -23,7 +22,7 @@ export function GenerateLauncherDialog() {
   const [open, setOpen] = useState(false);
   const onOpenChange = () => setOpen((prev) => !prev);
 
-  const connectionState = useConnectionHub();
+  const connectionState = useGenerateLauncherConnectionHub();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange} modal={false}>

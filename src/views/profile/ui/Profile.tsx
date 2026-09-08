@@ -15,7 +15,7 @@ import { AddingFoldersWhitelistDialog } from '@/widgets/adding-folders-whitelist
 import { GameServers } from '@/widgets/game-servers';
 import { EditProfileForm } from '@/features/edit-profile-form';
 import { Section } from '@/entities/Section';
-import { ProfileCard } from '@/entities/ProfileCard';
+import { ProfileCard } from '@/widgets/profile-card';
 import { DASHBOARD_PAGES } from '@/shared/routes';
 import { OsArchitectureEnum, OsTypeEnum } from '@/shared/enums';
 import { useDeleteFilesWhitelist, useDeleteFolderWhitelist, useProfile } from '@/shared/hooks';
@@ -41,7 +41,7 @@ import {
 } from '@/shared/ui/alert-dialog';
 import { FolderTable } from '@/widgets/folder-table';
 import { GamePlayers } from '@/widgets/game-players';
-import { useGamePlayerStore } from '@/widgets/game-players/lib/store';
+import { useGamePlayerStore } from '@/shared/store/gamePlayerStore';
 import { GameMods } from '@/widgets/game-mods';
 
 export const ProfilePage = ({ params }: { params: { name: string } }) => {

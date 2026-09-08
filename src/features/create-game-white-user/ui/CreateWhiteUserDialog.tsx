@@ -28,7 +28,7 @@ import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@
 import { cn } from '@/shared/lib/utils';
 import { $api } from '@/services/api.service';
 import { Input } from '@/shared/ui/input';
-import { useGamePlayerStore } from '@/widgets/game-players/lib/store';
+import { useGamePlayerStore } from '@/shared/store/gamePlayerStore';
 
 type AddGameServerDialogParams = {
   profile?: ProfileExtendedBaseEntity;

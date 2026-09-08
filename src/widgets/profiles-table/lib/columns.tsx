@@ -7,7 +7,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { createColumnHelper } from '@tanstack/table-core';
 import { Edit2Icon, Trash2Icon, X } from 'lucide-react';
 
-import { ClientState } from '@/widgets/client-hub';
+import { ClientState } from '@/shared/ui/ClientState';
 import { DataTableColumnHeader } from '@/entities/Table';
 import { Button } from '@/shared/ui/button';
 import { Checkbox } from '@/shared/ui/checkbox';

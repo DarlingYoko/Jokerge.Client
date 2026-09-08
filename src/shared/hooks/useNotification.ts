@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 
 import { notificationService } from '@/shared/services/NotifiactionService';
 import { serversKeys } from '@/shared/hooks';
-import { useNotificationsState } from '@/views/notification/lib/store';
+import { useNotificationsState } from '@/shared/store/notificationsStore';
 import { isAxiosError } from '@/shared/lib/isAxiosError/isAxiosError';
 
 export const notificationsKeys = {

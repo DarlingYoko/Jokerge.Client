@@ -6,7 +6,7 @@ import { BellIcon } from 'lucide-react';
 
 import { useConnectionHub } from '@/widgets/notifications-hub';
 import { ClearNotificationModel } from '@/widgets/clear-notifications';
-import { useNotificationsState } from '@/views/notification';
+import { useNotificationsState } from '@/shared/store/notificationsStore';
 import {
   DropdownMenu,
   DropdownMenuContent,

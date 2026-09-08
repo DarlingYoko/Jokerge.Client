@@ -15,7 +15,7 @@ import { Button } from '@/shared/ui/button';
 import { EntityState, ModType } from '@/shared/enums';
 import { Card, CardContent, CardHeader } from '@/shared/ui/card';
 import { GameModItem } from '@/widgets/game-mods/ui/GameModItem';
-import { useProfileCardStore } from "@/entities/ProfileCard/lib/store";
+import { useProfileCardStore } from '@/shared/store/profileCardStore';
 
 interface GameServersParams {
   profile: ProfileExtendedBaseEntity;

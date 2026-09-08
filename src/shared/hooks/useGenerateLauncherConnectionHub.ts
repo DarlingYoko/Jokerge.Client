@@ -10,7 +10,7 @@ import { getApiBaseUrl } from '@/shared/lib/utils';
 const CONNECTION_URL = (token: string) =>
   `${getApiBaseUrl()}/ws/launcher/build?access_token=${token}`;
 
-export const useConnectionHub = () => {
+export const useGenerateLauncherConnectionHub = () => {
   const accessToken = getStorageAccessToken();
 
   const [connectionHub, setConnectionHub] = useState<HubConnection | null>(null);

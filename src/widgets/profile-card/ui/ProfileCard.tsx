@@ -27,9 +27,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/shared/ui/dialog';
-import { useProfileCardStore } from '@/entities/ProfileCard/lib/store';
+import { useProfileCardStore } from '@/shared/store/profileCardStore';
 import { TooltipContent } from '@/shared/ui/tooltip';
-import { ClientState } from '@/widgets/client-hub';
+import { ClientState } from '@/shared/ui/ClientState';
 
 interface ProfileCardParams {
   profile: ProfileExtendedBaseEntity;

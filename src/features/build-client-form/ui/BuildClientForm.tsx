@@ -7,8 +7,11 @@ import { Check, ChevronsUpDown } from 'lucide-react';
 import { ClientBuildFormSchemaType, ClientBuildSchema } from '../lib/static';
 import { useOnSubmit } from '../lib/hooks/useOnSubmit';
 
-import { useConnectionHub } from '@/widgets/generate-launcher-dialog';
-import { useLauncherGithubVersions, useLauncherPlatforms } from '@/shared/hooks';
+import {
+  useGenerateLauncherConnectionHub,
+  useLauncherGithubVersions,
+  useLauncherPlatforms,
+} from '@/shared/hooks';
 import { cn } from '@/shared/lib/utils';
 import { Icons } from '@/shared/ui/icons';
 import { Button } from '@/shared/ui/button';
@@ -27,8 +30,8 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/popover';
 
 interface BuildClientFormProps extends React.HTMLAttributes<HTMLDivElement> {
-  connectionHub: ReturnType<typeof useConnectionHub>['connectionHub'];
-  state: ReturnType<typeof useConnectionHub>['build'];
+  connectionHub: ReturnType<typeof useGenerateLauncherConnectionHub>['connectionHub'];
+  state: ReturnType<typeof useGenerateLauncherConnectionHub>['build'];
 }
 
 const ubuntuMono = Ubuntu_Mono({

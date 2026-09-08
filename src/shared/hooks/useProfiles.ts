@@ -10,7 +10,7 @@ import {
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 
-import { useProfileCardStore } from '@/entities/ProfileCard/lib/store';
+import { useProfileCardStore } from '@/shared/store/profileCardStore';
 import {
   ProfileBaseEntity,
   TAddPlayerToProfileRequest,

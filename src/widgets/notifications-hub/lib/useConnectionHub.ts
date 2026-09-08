@@ -4,7 +4,7 @@ import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 
 import { getApiBaseUrl } from '@/shared/lib/utils';
 import { getStorageAccessToken } from '@/shared/services';
-import { useNotificationsState } from '@/views/notification/lib/store';
+import { useNotificationsState } from '@/shared/store/notificationsStore';
 import { NotificationBaseEntity } from '@/shared/api/contracts';
 import { useNotifications } from '@/shared/hooks';
 

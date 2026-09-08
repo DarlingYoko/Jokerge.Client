@@ -1,11 +1,37 @@
 {
   "extends": "next/core-web-vitals",
+  "plugins": ["boundaries"],
+  "settings": {
+    "boundaries/elements": [
+      { "type": "app", "pattern": "src/app/**", "mode": "full" },
+      { "type": "views", "pattern": "src/views/**", "mode": "full" },
+      { "type": "widgets", "pattern": "src/widgets/**", "mode": "full" },
+      { "type": "features", "pattern": "src/features/**", "mode": "full" },
+      { "type": "entities", "pattern": "src/entities/**", "mode": "full" },
+      { "type": "shared", "pattern": "src/shared/**", "mode": "full" }
+    ]
+  },
   "rules": {
     "sort-imports": "off",
     "import/order": [
       "error",
       {
         "newlines-between": "always"
+      }
+    ],
+    "boundaries/element-types": [
+      "error",
+      {
+        "default": "disallow",
+        "message": "\"${file.type}\" must not import \"${dependency.type}\" — Feature-Sliced layers only import downward (app > views > widgets > features > entities > shared).",
+        "rules": [
+          { "from": "app", "allow": ["app", "views", "widgets", "features", "entities", "shared"] },
+          { "from": "views", "allow": ["views", "widgets", "features", "entities", "shared"] },
+          { "from": "widgets", "allow": ["widgets", "features", "entities", "shared"] },
+          { "from": "features", "allow": ["features", "entities", "shared"] },
+          { "from": "entities", "allow": ["entities", "shared"] },
+          { "from": "shared", "allow": ["shared"] }
+        ]
       }
     ]
   }

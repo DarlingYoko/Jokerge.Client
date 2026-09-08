@@ -8,7 +8,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
 import { $api } from '@/services/api.service';
 import { CreateWhiteUserDialog } from '@/features/create-game-white-user';
 import { Button } from '@/shared/ui/button';
-import { useGamePlayerStore } from '@/widgets/game-players/lib/store';
+import { useGamePlayerStore } from '@/shared/store/gamePlayerStore';
 
 interface GameServersParams {
   profile: ProfileExtendedBaseEntity;
