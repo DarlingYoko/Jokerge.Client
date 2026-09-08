@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import DOMPurify from 'dompurify';
 import { CalendarIcon, Loader2Icon, NewspaperIcon } from 'lucide-react';
 
 import { socialNetworkLogos } from './NewsProviderDialog';
@@ -65,7 +66,11 @@ export function NewsListComponent() {
             <CardTitle className="text-base">{item.title}</CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="text-sm" dangerouslySetInnerHTML={{ __html: item.content }} />
+            <div
+              className="text-sm"
+              // Remote news-provider content — sanitize before rendering as HTML.
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.content) }}
+            />
           </CardContent>
         </Card>
       ))}
