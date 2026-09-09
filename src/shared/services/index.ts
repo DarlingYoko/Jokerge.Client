@@ -1,8 +1,6 @@
 export { authService } from './AuthService';
 export {
   getStorageAccessToken,
-  setStorageAccessToken,
-  removeStorageTokens,
   removeStorageProfile,
   getStorageProfile,
   setStorageProfile,

@@ -19,7 +19,7 @@ import { ProfileCard } from '@/widgets/profile-card';
 import { DASHBOARD_PAGES } from '@/shared/routes';
 import { OsArchitectureEnum, OsTypeEnum } from '@/shared/enums';
 import { useDeleteFilesWhitelist, useDeleteFolderWhitelist, useProfile } from '@/shared/hooks';
-import { getStorageAccessToken, getStorageProfile } from '@/shared/services';
+import { getStorageProfile } from '@/shared/services';
 import {
   FileListBaseEntity,
   FileListFolderBaseEntity,
@@ -46,13 +46,14 @@ import { GameMods } from '@/widgets/game-mods';
 
 export const ProfilePage = ({ params }: { params: { name: string } }) => {
   const account = getStorageProfile();
-  const accessToken = getStorageAccessToken();
   const { data, isPending } = useProfile(
-    account && accessToken
+    account
       ? {
           UserName: account.name,
           ProfileName: decodeURIComponent(params.name),
-          UserAccessToken: accessToken,
+          // Ignored server-side for this endpoint (GetProfileDetails authenticates via the
+          // admin session cookie, not this field) — kept only because the DTO still declares it.
+          UserAccessToken: '',
           UserUuid: 'uuid',
           OsArchitecture: OsArchitectureEnum.X64,
           OsType: OsTypeEnum.WINDOWS.toString(),

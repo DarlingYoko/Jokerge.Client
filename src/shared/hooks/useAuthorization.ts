@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 
 import { ApiPostSignInRequest, TPostSignUpRequest } from '@/shared/api/contracts';
 import { DASHBOARD_PAGES } from '@/shared/routes';
-import { authService, getStorageAccessToken } from '@/shared/services';
+import { authService, getStorageProfile } from '@/shared/services';
 import { isAxiosError } from '@/shared/lib/isAxiosError/isAxiosError';
 
 export const useRegistration = () => {
@@ -18,13 +18,13 @@ export const useRegistration = () => {
         description: 'Добро пожаловать в платформу',
       });
 
-      const waitForCookie = async (timeoutMs = 1000, stepMs = 50) => {
+      const waitForProfile = async (timeoutMs = 1000, stepMs = 50) => {
         const start = Date.now();
-        while (!getStorageAccessToken() && Date.now() - start < timeoutMs) {
+        while (!getStorageProfile() && Date.now() - start < timeoutMs) {
           await new Promise((r) => setTimeout(r, stepMs));
         }
       };
-      await waitForCookie();
+      await waitForProfile();
       route.replace(DASHBOARD_PAGES.PROFILES);
     },
     onError: (error) => {
@@ -48,13 +48,13 @@ export const useLogin = () => {
         description: 'Добро пожаловать в платформу',
       });
 
-      const waitForCookie = async (timeoutMs = 1000, stepMs = 50) => {
+      const waitForProfile = async (timeoutMs = 1000, stepMs = 50) => {
         const start = Date.now();
-        while (!getStorageAccessToken() && Date.now() - start < timeoutMs) {
+        while (!getStorageProfile() && Date.now() - start < timeoutMs) {
           await new Promise((r) => setTimeout(r, stepMs));
         }
       };
-      await waitForCookie();
+      await waitForProfile();
       route.replace(DASHBOARD_PAGES.PROFILES);
     },
     onError: (error) => {

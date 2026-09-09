@@ -6,62 +6,37 @@ import {
   TPostSignUpRequest,
   TPostSignUpResponse,
 } from '@/shared/api/contracts';
-import {
-  removeStorageRecloudIDAccessToken,
-  removeStorageTokens,
-  setStorageAccessToken,
-  setStorageProfile,
-} from '@/shared/services';
+import { removeStorageRecloudIDAccessToken, setStorageProfile } from '@/shared/services';
 
 class AuthService {
   private BASE_URL = '/users';
 
+  // accessToken/refreshToken arrive as httpOnly cookies the browser stores automatically
+  // ($api sends withCredentials); this JS layer never sees the raw token. The response body
+  // carries the same claims decoded server-side, under `profile`, for UI purposes.
   async signUp(body: TPostSignUpRequest): Promise<TPostSignUpResponse> {
     const { data } = await $api.post<TPostSignUpResponse>(`${this.BASE_URL}/signup`, body);
-    const { accessToken } = data.data;
-    setStorageAccessToken(accessToken);
-
-    const payloadRaw = accessToken.split('.')[1];
-    const payload = atob(payloadRaw);
-
-    const profile = JSON.parse(payload) as ApiUserBaseEntity;
-
-    setStorageProfile(profile);
+    setStorageProfile(data.data.profile as ApiUserBaseEntity);
 
     return data;
   }
 
   async signIn(body: ApiPostSignInRequest): Promise<ApiPostSignInResponse> {
     const { data } = await $api.post<ApiPostSignInResponse>(`${this.BASE_URL}/signin`, body);
-    const { accessToken } = data.data;
-    setStorageAccessToken(accessToken);
-
-    const payloadRaw = accessToken.split('.')[1];
-    const payload = atob(payloadRaw);
-
-    const profile = JSON.parse(payload) as ApiUserBaseEntity;
-
-    setStorageProfile(profile);
+    setStorageProfile(data.data.profile as ApiUserBaseEntity);
 
     return data;
   }
 
-  async refresh(): Promise<{ accessToken: string; expiresIn: number }> {
+  async refresh(): Promise<{ expiresIn: number }> {
     // The API returns ResponseMessage<AuthTokensDto>
     const { data } = await $api.get<{
-      data: { accessToken: string; expiresIn: number };
+      data: { expiresIn: number; profile: ApiUserBaseEntity };
     }>(`${this.BASE_URL}/refresh`);
 
-    const { accessToken, expiresIn } = data.data;
-    setStorageAccessToken(accessToken);
+    setStorageProfile(data.data.profile);
 
-    // Update profile from JWT payload so that exp is current
-    const payloadRaw = accessToken.split('.')[1];
-    const payload = atob(payloadRaw);
-    const profile = JSON.parse(payload) as ApiUserBaseEntity;
-    setStorageProfile(profile);
-
-    return { accessToken, expiresIn };
+    return { expiresIn: data.data.expiresIn };
   }
 
   async logout() {
@@ -69,7 +44,6 @@ class AuthService {
       await $api.post(`${this.BASE_URL}/logout`, {});
     } catch (_) {
     } finally {
-      removeStorageTokens();
       removeStorageRecloudIDAccessToken();
     }
   }

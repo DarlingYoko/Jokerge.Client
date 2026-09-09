@@ -7,11 +7,18 @@ import { getTokenExpiredTime, isTokenExpired } from '@/shared/lib/utils';
 // page navigation for the whole fetch timeout — fail fast to sign-in instead.
 const REFRESH_FETCH_TIMEOUT_MS = 5000;
 
-function accessTokenCookieOptions(newToken: string) {
+// Mirrors AuthHandler.BuildAccessCookieOptions on the Api side — this middleware runs its own
+// server-side refresh (see attemptRefresh below) and must set the resulting cookie with the
+// same HttpOnly/Secure/SameSite attributes the Api itself uses, or a middleware-triggered
+// refresh would silently strip HttpOnly off the cookie until the next Api-driven refresh.
+function accessTokenCookieOptions(newToken: string, isHttps: boolean) {
   const expSeconds = getTokenExpiredTime(newToken);
+  const sameSite: 'none' | 'lax' = isHttps ? 'none' : 'lax';
   return {
     path: '/' as const,
-    sameSite: 'lax' as const,
+    httpOnly: true as const,
+    secure: isHttps,
+    sameSite,
     ...(expSeconds ? { expires: new Date(expSeconds * 1000) } : {}),
   };
 }
@@ -82,6 +89,7 @@ export async function middleware(request: NextRequest) {
 
   const isProtectedRoute = protectedRoutes.includes(pathname);
   const isPublicRoute = publicRoutes.includes(pathname);
+  const isHttps = request.nextUrl.protocol === 'https:';
 
   const accessToken = cookies.get('accessToken')?.value;
   const hasRefresh = Boolean(cookies.get('refreshToken'));
@@ -94,7 +102,7 @@ export async function middleware(request: NextRequest) {
       response.cookies.set(
         'accessToken',
         refreshed.accessToken,
-        accessTokenCookieOptions(refreshed.accessToken),
+        accessTokenCookieOptions(refreshed.accessToken, isHttps),
       );
       for (const cookie of refreshed.setCookies) response.headers.append('set-cookie', cookie);
       return response;
@@ -114,7 +122,7 @@ export async function middleware(request: NextRequest) {
       redirect.cookies.set(
         'accessToken',
         refreshed.accessToken,
-        accessTokenCookieOptions(refreshed.accessToken),
+        accessTokenCookieOptions(refreshed.accessToken, isHttps),
       );
       for (const cookie of refreshed.setCookies) redirect.headers.append('set-cookie', cookie);
       return redirect;

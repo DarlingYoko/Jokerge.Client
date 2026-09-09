@@ -90,17 +90,15 @@ export default function MntSetupPage() {
         }
         throw new Error(readable);
       }
-      // Success: backend returns accessToken similar to signup. Save user like signup flow
+      // Success: the access/refresh tokens arrive as httpOnly cookies (this call already sends
+      // credentials: 'include' above); the response body only carries the decoded profile claims
+      // for UI purposes, same shape signin/signup return.
       try {
         const json = await res.json();
-        const accessToken: string | undefined = json?.data?.accessToken;
-        if (accessToken) {
+        const profile = json?.data?.profile;
+        if (profile) {
           // Dynamically import to avoid SSR issues
-          const { setStorageAccessToken, setStorageProfile } = await import('@/shared/services');
-          setStorageAccessToken(accessToken);
-          const payloadRaw = accessToken.split('.')[1];
-          const payload = atob(payloadRaw);
-          const profile = JSON.parse(payload);
+          const { setStorageProfile } = await import('@/shared/services');
           setStorageProfile(profile);
         }
       } catch {

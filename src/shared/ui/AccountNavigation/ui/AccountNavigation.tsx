@@ -15,7 +15,6 @@ import {
   getStorageProfile,
   removeStorageProfile,
   removeStorageRecloudIDAccessToken,
-  removeStorageTokens,
 } from '@/shared/services';
 import { AUTH_PAGES } from '@/shared/routes';
 import { authService } from '@/shared/services';

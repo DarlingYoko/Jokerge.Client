@@ -5,9 +5,10 @@ import { HubConnection, HubConnectionBuilder, LogLevel } from "@microsoft/signal
 import { toast } from "sonner";
 
 import { getApiBaseUrl } from "@/shared/lib/utils";
-import { getStorageAccessToken } from "@/shared/services";
 
-const CONNECTION_URL = (token: string) => `${getApiBaseUrl()}/ws/audit?access_token=${token}`;
+// The access token rides along as an httpOnly cookie (withCredentials below), not a query
+// param — the browser attaches it automatically, JS never sees the value.
+const CONNECTION_URL = () => `${getApiBaseUrl()}/ws/audit`;
 
 export interface AuditStageResultMessage {
   type: "default" | "success" | "warning" | "error";
@@ -34,8 +35,6 @@ export interface UseAuditHubState {
 }
 
 export const useAuditHub = (): UseAuditHubState => {
-  const token = getStorageAccessToken();
-
   const [connection, setConnection] = useState<HubConnection | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
@@ -46,11 +45,10 @@ export const useAuditHub = (): UseAuditHubState => {
   const startingRef = useRef(false);
 
   const ensureConnection = useCallback(async () => {
-    if (!token) throw new Error("Нет access token для подключения к AuditHub");
     if (connection && isConnected) return connection;
 
     const conn = new HubConnectionBuilder()
-      .withUrl(CONNECTION_URL(token), { withCredentials: true })
+      .withUrl(CONNECTION_URL(), { withCredentials: true })
       .withAutomaticReconnect()
       .configureLogging(LogLevel.Warning)
       .build();
@@ -161,7 +159,7 @@ export const useAuditHub = (): UseAuditHubState => {
     await conn.start();
     setIsConnected(true);
     return conn;
-  }, [connection, isConnected, token]);
+  }, [connection, isConnected]);
 
   const start = useCallback(async (address?: string) => {
     if (startingRef.current) return;

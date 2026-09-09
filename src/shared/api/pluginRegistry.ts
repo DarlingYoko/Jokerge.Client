@@ -1,10 +1,7 @@
 import { getApiBaseUrl } from './getApiBaseUrl';
 
 import { ResponseBaseEntity } from '@/shared/api/schemas';
-import {
-  getStorageAccessToken,
-  getStorageRecloudIDAccessToken,
-} from '@/shared/services/AuthTokenService';
+import { getStorageRecloudIDAccessToken } from '@/shared/services/AuthTokenService';
 
 // Response type for plugin script
 export type PluginScriptResponse = ResponseBaseEntity & {
@@ -39,18 +36,17 @@ export class PluginRegistry {
         throw new Error('GML Backend URL is not defined');
       }
 
-      // Get the access token
-      const accessToken = getStorageAccessToken();
-
       // Get the RecloudID token
       const recloudIdToken = getStorageRecloudIDAccessToken();
 
-      // Make the API request to the specified endpoint
+      // Make the API request to the specified endpoint. The access token rides along as an
+      // httpOnly cookie (credentials below) rather than an Authorization header — JS never
+      // sees the value.
       const response = await fetch(`${gmlBackendUrl}/api/v1/plugins/script/${place}`, {
         method: 'GET',
+        credentials: 'include',
         headers: {
           Accept: 'application/json',
-          Authorization: `Bearer ${accessToken}`,
           ...(recloudIdToken ? { 'recloud-id-token': recloudIdToken } : {}),
         },
         signal: controller.signal,

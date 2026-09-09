@@ -4,15 +4,13 @@ import { useEffect, useState } from 'react';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { toast } from 'sonner';
 
-import { getStorageAccessToken } from '@/shared/services';
 import { getApiBaseUrl } from '@/shared/lib/utils';
 
-const CONNECTION_URL = (token: string) =>
-  `${getApiBaseUrl()}/ws/launcher/build?access_token=${token}`;
+// The access token rides along as an httpOnly cookie (withCredentials below), not a query
+// param — the browser attaches it automatically, JS never sees the value.
+const CONNECTION_URL = () => `${getApiBaseUrl()}/ws/launcher/build`;
 
 export const useGenerateLauncherConnectionHub = () => {
-  const accessToken = getStorageAccessToken();
-
   const [connectionHub, setConnectionHub] = useState<HubConnection | null>(null);
 
   const [logsBuilding, setLogsBuilding] = useState<string[] | null>(null);
@@ -31,14 +29,12 @@ export const useGenerateLauncherConnectionHub = () => {
   };
 
   useEffect(() => {
-    if (!accessToken) return;
-
     let connection: HubConnection | undefined;
 
     const onConnectedHub = async () => {
       try {
         connection = new HubConnectionBuilder()
-          .withUrl(CONNECTION_URL(accessToken), {
+          .withUrl(CONNECTION_URL(), {
             withCredentials: true,
           })
           .withAutomaticReconnect()

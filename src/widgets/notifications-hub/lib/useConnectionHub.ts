@@ -3,13 +3,13 @@ import { toast } from 'sonner';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 
 import { getApiBaseUrl } from '@/shared/lib/utils';
-import { getStorageAccessToken } from '@/shared/services';
 import { useNotificationsState } from '@/shared/store/notificationsStore';
 import { NotificationBaseEntity } from '@/shared/api/contracts';
 import { useNotifications } from '@/shared/hooks';
 
-const CONNECTION_URL = (token: string) =>
-  `${getApiBaseUrl()}/ws/notifications?access_token=${token}`;
+// The access token rides along as an httpOnly cookie (withCredentials below), not a query
+// param — the browser attaches it automatically, JS never sees the value.
+const CONNECTION_URL = () => `${getApiBaseUrl()}/ws/notifications`;
 
 export const useConnectionHub = () => {
   const { addNotification, addCount, setNotifications, setCount } = useNotificationsState();
@@ -23,16 +23,13 @@ export const useConnectionHub = () => {
     }
   }, [data]);
 
-  const accessToken = getStorageAccessToken();
-
   const [connectionHub, setConnectionHub] = useState<HubConnection | null>(null);
 
   useEffect(() => {
-    if (!accessToken) return;
     const onConnectedHub = async () => {
       try {
         const connection = new HubConnectionBuilder()
-          .withUrl(CONNECTION_URL(accessToken), {
+          .withUrl(CONNECTION_URL(), {
             withCredentials: true,
           })
           .withAutomaticReconnect()

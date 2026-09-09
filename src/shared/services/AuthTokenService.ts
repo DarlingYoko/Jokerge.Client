@@ -1,7 +1,6 @@
 import Cookies from 'js-cookie';
 
 import { ApiUserBaseEntity, UserBaseEntity } from '@/shared/api/contracts';
-import { getTokenExpiredTime } from '@/shared/lib/utils';
 
 export const getStorageProfile = () => {
   const profile = Cookies.get('profile');
@@ -27,22 +26,11 @@ export const setStorageProfile = (apiProfile: ApiUserBaseEntity) => {
 
 export const removeStorageProfile = () => Cookies.remove('profile');
 
+// accessToken is now an httpOnly cookie set exclusively by the Api (see AuthHandler) and by
+// this app's own middleware.ts (server-side refresh) — this getter is kept only because
+// GmlContextInitializer still wires it up for legacy plugin scripts; it always returns null
+// now, since httpOnly cookies aren't visible to JS by design.
 export const getStorageAccessToken = () => Cookies.get('accessToken') || null;
-
-export const setStorageAccessToken = (token: string) => {
-  // Match the cookie's lifetime to the JWT's actual exp claim (~15 min) instead of a flat 1 day,
-  // so an already-expired access token doesn't keep sitting in storage for hours afterward.
-  const expSeconds = getTokenExpiredTime(token);
-  const expires = expSeconds ? new Date(expSeconds * 1000) : 1;
-
-  Cookies.set('accessToken', token, {
-    path: '/',
-    sameSite: 'lax',
-    expires,
-  });
-};
-
-export const removeStorageTokens = () => Cookies.remove('accessToken');
 
 // RecloudID specific token storage
 export const getStorageRecloudIDAccessToken = () => Cookies.get('recloudIDAccessToken') || null;

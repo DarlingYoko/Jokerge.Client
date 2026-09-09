@@ -1,4 +1,4 @@
-import { PlayerBaseEntity, UserBaseEntity } from '@/shared/api/contracts';
+import { ApiUserBaseEntity, PlayerBaseEntity, UserBaseEntity } from '@/shared/api/contracts';
 import { ResponseBaseEntity } from '@/shared/api/schemas';
 
 // Регистрация
@@ -9,7 +9,9 @@ export type TPostSignUpRequest = {
 };
 export type TPostSignUpResponse = ResponseBaseEntity & {
   data: UserBaseEntity & {
-    accessToken: string;
+    // accessToken/refreshToken arrive as httpOnly cookies, not in the body — profile carries
+    // the same claims as plain JSON so the client can read them without decoding a JWT.
+    profile: ApiUserBaseEntity;
   };
 };
 
@@ -20,8 +22,8 @@ export type ApiPostSignInRequest = {
 };
 export type ApiPostSignInResponse = ResponseBaseEntity & {
   data: {
-    accessToken: string;
     expiresIn: number;
+    profile: ApiUserBaseEntity;
   };
 };
 

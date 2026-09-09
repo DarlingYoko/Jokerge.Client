@@ -3,7 +3,6 @@ import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import { getStorageAccessToken } from '@/shared/services';
 import { JavaVersionBaseEntity, ProfileExtendedBaseEntity } from '@/shared/api/contracts';
 import { getApiBaseUrl } from '@/shared/lib/utils';
 import { useProfileCardStore } from '@/shared/store/profileCardStore';
@@ -15,13 +14,12 @@ interface ConnectionHubProps {
   isLoading?: boolean;
 }
 
-const CONNECTION_URL = (token: string) =>
-  `${getApiBaseUrl()}/ws/profiles/restore?access_token=${token}`;
+// The access token rides along as an httpOnly cookie (withCredentials below), not a query
+// param — the browser attaches it automatically, JS never sees the value.
+const CONNECTION_URL = () => `${getApiBaseUrl()}/ws/profiles/restore`;
 
 export const useConnectionHub = (props: ConnectionHubProps) => {
   const { profile, isLoading } = props;
-
-  const accessToken = getStorageAccessToken();
 
   const [connectionHub, setConnectionHub] = useState<HubConnection | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -50,12 +48,12 @@ export const useConnectionHub = (props: ConnectionHubProps) => {
   };
 
   useEffect(() => {
-    if (isLoading || !accessToken) return;
+    if (isLoading) return;
 
     const onConnectedHub = async () => {
       try {
         const connection = new HubConnectionBuilder()
-          .withUrl(CONNECTION_URL(accessToken), {
+          .withUrl(CONNECTION_URL(), {
             withCredentials: true,
           })
           .withAutomaticReconnect()
