@@ -64,6 +64,14 @@ export const EditProfileSchema = z.object({
   icon: z.any(),
   isEnabled: z.boolean().default(true).optional(),
   background: z.any(),
+  discordName: z
+  .string()
+  .max(128, { message: 'Название в Discord не должно быть больше 128 символов' })
+  .optional(),
+  discordImage: z
+  .string()
+  .max(256, { message: 'Иконка в Discord не должна быть больше 256 символов' })
+  .optional(),
 });
 
 export const RestoreProfileSchema = z.object({

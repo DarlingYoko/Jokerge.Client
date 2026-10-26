@@ -13,6 +13,8 @@ export type ProfileBaseEntity = {
   jvmArguments: string;
   iconBase64: string;
   state: number;
+  discordName?: string | null;
+  discordImage?: string | null;
 };
 
 export type ProfileExtendedBaseEntity = {
@@ -38,6 +40,8 @@ export type ProfileExtendedBaseEntity = {
   whiteListFiles: ProfileFileBaseEntity[];
   whiteListFolders: ProfileFolderBaseEntity[];
   usersWhiteList: PlayerBaseEntity[];
+  discordName?: string | null;
+  discordImage?: string | null;
 };
 
 export type ProfileFileBaseEntity = {

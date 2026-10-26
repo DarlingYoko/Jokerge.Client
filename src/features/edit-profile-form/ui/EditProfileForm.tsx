@@ -36,6 +36,8 @@ export const EditProfileForm = (props: EditProfileFormProps) => {
       recommendedRam: profile?.recommendedRam || 1024,
       background: profile?.background || '',
       isEnabled: profile?.isEnabled,
+      discordName: profile?.discordName ?? '',
+      discordImage: profile?.discordImage ?? '',
     },
     resolver: zodResolver(EditProfileSchema),
   });
@@ -48,6 +50,8 @@ export const EditProfileForm = (props: EditProfileFormProps) => {
     formUpdate.append('displayName', body.displayName);
     formUpdate.append('originalName', profile?.profileName || '');
     formUpdate.append('description', body.description);
+    formUpdate.append('discordName', body.discordName?.trim() ?? '');
+    formUpdate.append('discordImage', body.discordImage?.trim() ?? '');
 
     const iconFile =
       body.icon && typeof body.icon !== 'string' && body.icon[0] instanceof File
@@ -182,6 +186,47 @@ export const EditProfileForm = (props: EditProfileFormProps) => {
               />
               {form.formState.errors.description && (
                 <FormMessage>{form.formState.errors.description.message?.toString()}</FormMessage>
+              )}
+            </div>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8">
+            <div className="flex flex-col gap-y-1 w-full md:min-w-96 mb-2 lg:mb-0">
+              <h6 className="text-sm font-bold">Название в Discord</h6>
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                Отображается в статусе Discord (Rich Presence). Если пусто, используется
+                отображаемое имя
+              </p>
+            </div>
+            <div className="flex flex-col gap-y-1 w-full md:min-w-96 mb-2 lg:mb-0">
+              <Input
+                type="text"
+                placeholder="Введите название для Discord"
+                maxLength={128}
+                {...form.register('discordName')}
+              />
+              {form.formState.errors.discordName && (
+                <FormMessage>{form.formState.errors.discordName.message?.toString()}</FormMessage>
+              )}
+            </div>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8">
+            <div className="flex flex-col gap-y-1 w-full md:min-w-96 mb-2 lg:mb-0">
+              <h6 className="text-sm font-bold">Иконка в Discord (в игре)</h6>
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                Ключ ассета Discord-приложения или https-ссылка на изображение. Показывается, пока
+                игрок играет в этом профиле. Если пусто, используется изображение из настроек
+                интеграции Discord
+              </p>
+            </div>
+            <div className="flex flex-col gap-y-1 w-full md:min-w-96 mb-2 lg:mb-0">
+              <Input
+                type="text"
+                placeholder="Например: logo или https://example.com/icon.png"
+                maxLength={256}
+                {...form.register('discordImage')}
+              />
+              {form.formState.errors.discordImage && (
+                <FormMessage>{form.formState.errors.discordImage.message?.toString()}</FormMessage>
               )}
             </div>
           </div>

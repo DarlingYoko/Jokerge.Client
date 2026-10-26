@@ -1,0 +1,23 @@
+# Installed fresh inside the image (deps stage); the host copy is Windows-built and huge.
+node_modules
+.next
+out
+build
+coverage
+
+.git
+.github
+.idea
+.vscode
+
+test-results
+playwright-report
+blob-report
+playwright
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# .env stays in the context on purpose: `next build` inlines NEXT_PUBLIC_* from it.
+.env*.local

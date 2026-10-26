@@ -62,6 +62,8 @@ export const ProfileCard = ({ profile }: ProfileCardParams) => {
     formUpdate.append('gameArguments', profile?.gameArguments);
     formUpdate.append('priority', profile?.priority?.toString() ?? '0');
     formUpdate.append('recommendedRam', (profile?.recommendedRam ?? 1024).toString());
+    formUpdate.append('discordName', profile?.discordName ?? '');
+    formUpdate.append('discordImage', profile?.discordImage ?? '');
 
     // Обработка загрузки иконки
     if (body.icon && body.icon[0]) {
