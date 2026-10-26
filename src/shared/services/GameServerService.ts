@@ -32,7 +32,7 @@ class GameServerService {
 
   async deleteServer(body: TDeleteGameServersRequest): Promise<TDeleteGameServersResponse> {
     const { data } = await $api.delete<TDeleteGameServersResponse>(
-      `${this.BASE_URL}/${body.profileName}/${body.serverName}`,
+      `${this.BASE_URL}/${body.profileName}/${encodeURIComponent(body.serverName)}`,
     );
 
     return data;
@@ -44,7 +44,8 @@ class GameServerService {
     ...body
   }: TPutGameServersRequest): Promise<TPutGameServersResponse> {
     const { data } = await $api.put<TPutGameServersResponse>(
-      `${this.BASE_URL}/${profileName}/${serverName}`,
+      // Server names are free text: `#`, `?`, `%` or a trailing space would otherwise corrupt the URL.
+      `${this.BASE_URL}/${profileName}/${encodeURIComponent(serverName)}`,
       body,
     );
     return data;
