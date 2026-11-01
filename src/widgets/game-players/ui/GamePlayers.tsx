@@ -39,17 +39,19 @@ export const GamePlayers = ({ profile }: GameServersParams) => {
               <img
                 src={$api.getUri() + `/integrations/texture/head/${server.uuid}`}
                 alt="skin"
-                className="w-12 h-12 mt-1 rounded-lg"
+                className="w-12 h-12 mt-1 rounded-lg shrink-0"
               />
-              <div className="ml-2">
-                <CardTitle className="font-bold">{server.name}</CardTitle>
+              <div className="ml-2 min-w-0 flex-1">
+                <CardTitle className="font-bold truncate" title={server.name}>
+                  {server.name}
+                </CardTitle>
                 <CardDescription className="font-medium mt-1">
                   {server.isBanned ? 'Заблокирован' : 'Не заблокирован'}
                 </CardDescription>
               </div>
               <Button
                 variant="destructive"
-                className="w-8 h-8 p-0"
+                className="w-8 h-8 p-0 shrink-0"
                 onClick={() => deletePlayer(server.uuid)}
               >
                 <TrashIcon size="16" />
