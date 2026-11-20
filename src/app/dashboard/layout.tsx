@@ -1,6 +1,13 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowUpDownIcon, BlocksIcon, PieChartIcon, SettingsIcon, Users2Icon } from 'lucide-react';
+import {
+  ArrowUpDownIcon,
+  BlocksIcon,
+  NewspaperIcon,
+  PieChartIcon,
+  SettingsIcon,
+  Users2Icon,
+} from 'lucide-react';
 
 import classes from './styles.module.css';
 
@@ -19,6 +26,11 @@ const menu: TMenuItem[] = [
     icon: <BlocksIcon size={16} />,
     path: DASHBOARD_PAGES.PROFILES,
     text: 'Профили',
+  },
+  {
+    icon: <NewspaperIcon size={16} />,
+    path: DASHBOARD_PAGES.NEWS,
+    text: 'Новости',
   },
   {
     icon: <ArrowUpDownIcon size={16} />,
