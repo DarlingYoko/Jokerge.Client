@@ -1,15 +1,13 @@
-import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { ApiPostSignInRequest, TPostSignUpRequest } from '@/shared/api/contracts';
 import { DASHBOARD_PAGES } from '@/shared/routes';
+import { enterWithNewSession } from '@/shared/lib/auth/navigation';
 import { authService, getStorageProfile } from '@/shared/services';
 import { isAxiosError } from '@/shared/lib/isAxiosError/isAxiosError';
 
 export const useRegistration = () => {
-  const route = useRouter();
-
   return useMutation({
     mutationKey: ['signup'],
     mutationFn: (data: TPostSignUpRequest) => authService.signUp(data),
@@ -25,7 +23,7 @@ export const useRegistration = () => {
         }
       };
       await waitForProfile();
-      route.replace(DASHBOARD_PAGES.PROFILES);
+      enterWithNewSession(DASHBOARD_PAGES.PROFILES);
     },
     onError: (error) => {
       isAxiosError({
@@ -38,8 +36,6 @@ export const useRegistration = () => {
 };
 
 export const useLogin = () => {
-  const route = useRouter();
-
   return useMutation({
     mutationKey: ['signin'],
     mutationFn: (data: ApiPostSignInRequest) => authService.signIn(data),
@@ -55,7 +51,7 @@ export const useLogin = () => {
         }
       };
       await waitForProfile();
-      route.replace(DASHBOARD_PAGES.PROFILES);
+      enterWithNewSession(DASHBOARD_PAGES.PROFILES);
     },
     onError: (error) => {
       isAxiosError({

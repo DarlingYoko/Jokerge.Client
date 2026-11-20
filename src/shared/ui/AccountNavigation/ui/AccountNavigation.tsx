@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { CircleUser } from 'lucide-react';
 
 import { Button } from '@/shared/ui/button';
@@ -17,10 +16,10 @@ import {
   removeStorageRecloudIDAccessToken,
 } from '@/shared/services';
 import { AUTH_PAGES } from '@/shared/routes';
+import { enterWithNewSession } from '@/shared/lib/auth/navigation';
 import { authService } from '@/shared/services';
 
 export const AccountNavigation = () => {
-  const router = useRouter();
   const profile = getStorageProfile();
 
   const destroySession = async () => {
@@ -32,7 +31,7 @@ export const AccountNavigation = () => {
       removeStorageProfile();
       // Токены и интеграции чистятся внутри authService.logout() в finally,
       // но повторная очистка безопасна, оставим только профиль здесь для ясности
-      router.push(AUTH_PAGES.SIGN_IN);
+      enterWithNewSession(AUTH_PAGES.SIGN_IN);
     }
   };
 

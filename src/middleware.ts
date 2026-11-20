@@ -23,15 +23,9 @@ function accessTokenCookieOptions(newToken: string, isHttps: boolean) {
   };
 }
 
-const protectedRoutes = [
-  DASHBOARD_PAGES.HOME,
-  DASHBOARD_PAGES.ACCOUNT,
-  DASHBOARD_PAGES.SETTINGS,
-  DASHBOARD_PAGES.SERVERS,
-  DASHBOARD_PAGES.INTEGRATIONS,
-  DASHBOARD_PAGES.PROFILES,
-  DASHBOARD_PAGES.PROFILE,
-];
+// Every page under /dashboard needs a session; a fixed list went stale as pages were added.
+const isDashboardPath = (pathname: string): boolean =>
+  pathname === DASHBOARD_PAGES.HOME || pathname.startsWith(`${DASHBOARD_PAGES.HOME}/`);
 const publicRoutes = ['/', AUTH_PAGES.HOME, AUTH_PAGES.SIGN_IN];
 
 interface RefreshResult {
@@ -51,7 +45,7 @@ async function attemptRefresh(request: NextRequest): Promise<RefreshResult | nul
     const refreshUrl = new URL('/api/v1/users/refresh', request.url);
     const res = await fetch(refreshUrl, {
       method: 'GET',
-      headers: { cookie: request.headers.get('cookie') ?? '' },
+      headers: refreshHeaders(request),
       signal: AbortSignal.timeout(REFRESH_FETCH_TIMEOUT_MS),
     });
     if (!res.ok) return null;
@@ -72,6 +66,15 @@ async function attemptRefresh(request: NextRequest): Promise<RefreshResult | nul
   }
 }
 
+// This fetch comes from the Next server, so without the player's address the API rate-limits
+// every panel user's refresh as one client (the API trusts X-Forwarded-For from private networks).
+function refreshHeaders(request: NextRequest): Record<string, string> {
+  const headers: Record<string, string> = { cookie: request.headers.get('cookie') ?? '' };
+  const forwardedFor = request.headers.get('x-forwarded-for');
+  if (forwardedFor) headers['x-forwarded-for'] = forwardedFor;
+  return headers;
+}
+
 function safeIsExpired(token?: string | null): boolean {
   try {
     return isTokenExpired(token || undefined);
@@ -87,12 +90,21 @@ export async function middleware(request: NextRequest) {
     nextUrl: { pathname },
   } = request;
 
-  const isProtectedRoute = protectedRoutes.includes(pathname);
+  const isProtectedRoute = isDashboardPath(pathname);
   const isPublicRoute = publicRoutes.includes(pathname);
   const isHttps = request.nextUrl.protocol === 'https:';
 
   const accessToken = cookies.get('accessToken')?.value;
   const hasRefresh = Boolean(cookies.get('refreshToken'));
+
+  // The router caches a prefetch's redirect and replays it on click, even after the session is
+  // restored, so an idle panel kept bouncing to sign-in until a reload. Wherever auth would
+  // redirect or refresh, a prefetch gets an empty answer instead: the click then becomes a
+  // full navigation and this middleware decides with the cookies of that moment.
+  if (request.headers.has('next-router-prefetch')) {
+    const needsAuthDecision = isPublicRoute || (isProtectedRoute && safeIsExpired(accessToken));
+    return needsAuthDecision ? new NextResponse(null, { status: 204 }) : NextResponse.next();
+  }
 
   // 1) Protected routes: try server-side refresh before redirecting to sign-in
   if (isProtectedRoute && safeIsExpired(accessToken)) {
