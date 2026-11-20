@@ -1,50 +1,32 @@
 import { ResponseBaseEntity } from '@/shared/api/schemas';
 import {
-  BaseSentryError,
-  BaseSentryException,
   BaseSentryStats,
   BaseSentrySummary,
+  SentryIssue,
 } from '@/shared/api/contracts/sentry/schemas';
 import { ProjectTypeEnum } from '@/shared/enums';
 
-export type TPostSentryErrorsRequest = {
+export type TPostSentryIssuesRequest = {
   projectType: ProjectTypeEnum;
-  dateFrom: string;
+  /** UTC ISO instant; null means all time. */
+  dateFrom: string | null;
   dateTo: string;
+  /** Viewer offset in minutes east of UTC, for chart buckets. */
+  tzOffset: number;
 };
-export type TPostSentryErrorsResponse = ResponseBaseEntity & {
-  data: BaseSentryError;
-};
-
-export type TPostSentryFilterErrorsListRequest = {
-  projectType: ProjectTypeEnum;
-  dateFrom: string;
-  dateTo: string;
-};
-export type TPostSentryFilterErrorsListResponse = ResponseBaseEntity & {
-  data: BaseSentryError[];
+export type TPostSentryIssuesResponse = ResponseBaseEntity & {
+  data: SentryIssue[];
 };
 
-export type TPostSentryFilterErrorsRequest = {
-  projectType: ProjectTypeEnum;
-  dateFrom: string;
-  dateTo: string;
-};
-export type TPostSentryFilterErrorsResponse = ResponseBaseEntity & {
-  data: BaseSentryError;
-};
+export type TPostSentryResolveIssueRequest = { fingerprint: string };
+export type TPostSentryResolveIssueResponse = ResponseBaseEntity & { data: number };
 
-export type TGetSentryExceptionRequest = {};
-export type TGetSentryExceptionResponse = ResponseBaseEntity & {
-  data: BaseSentryException;
-};
-
-export type TGetSentryStatsRequest = {};
 export type TGetSentryStatsResponse = ResponseBaseEntity & {
   data: BaseSentryStats[];
 };
 
-export type TGetSentrySummaryRequest = {};
 export type TGetSentrySummaryResponse = ResponseBaseEntity & {
   data: BaseSentrySummary;
 };
+
+export type TPostSentryClearResponse = ResponseBaseEntity;

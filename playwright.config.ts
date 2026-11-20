@@ -11,6 +11,8 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './src',
+  // *.unit.test.ts are Vitest unit tests (npm run test:unit).
+  testIgnore: '**/*.unit.test.ts',
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */

@@ -1,41 +1,66 @@
-export interface SentryBug {
-  id: string;
-  pcName: string;
-  username: string;
-  memoryInfo: MemoryInfo;
-  exceptions: Exception[];
-  sendAt: string;
-  ipAddress: string;
-  osVersion: string;
-  osIdentifier: string;
-}
+import { ProjectTypeEnum } from '@/shared/enums';
+import { SentryGranularity } from '@/shared/lib/sentry/format';
 
-export interface Graphic {
-  month: string;
-  count: number;
-}
-
-export interface OperationSystem {
-  count: number;
-  osType: string;
-}
-
-export type BaseSentryError = {
-  countUsers: number;
-  count: number;
-  exception: string;
-  stackTrace: string;
-  graphic: Graphic[];
-  operationSystems: OperationSystem[];
-  bugInfo: SentryBug;
+export type SentryFrame = {
+  function: string | null;
+  file: string | null;
+  line: number | null;
+  /** Frame in our own code (launcher), as opposed to .NET/library code. */
+  inApp: boolean;
 };
 
-export type BaseSentryException = {
-  exception: string;
-  countUsers: number;
+export type SentryExceptionInfo = {
+  type: string;
+  message: string;
+  frames: SentryFrame[];
+};
+
+export type SentryCount = { name: string; count: number };
+
+/** One chart bar; `start` is viewer wall-clock time ("2026-11-20" or "2026-11-20T15:00"). */
+export type SentryBucket = { start: string; count: number };
+
+export type SentryIssueUser = {
+  username: string;
+  pcName: string;
   count: number;
-  operationSystems: SentryOperationSystem[];
-  bugInfo: SentryBug;
+  lastSeen: string;
+  ipAddress: string | null;
+  os: string | null;
+  release: string | null;
+};
+
+export type SentryIssueEvent = {
+  id: string;
+  sendAt: string;
+  username: string | null;
+  pcName: string | null;
+  ipAddress: string | null;
+  os: string | null;
+  runtime: string | null;
+  release: string | null;
+  memoryAllocatedBytes: number | null;
+  memoryTotalBytes: number | null;
+  /** Outermost exception first, crashing frame first. */
+  exceptions: SentryExceptionInfo[];
+  stackTrace: string;
+};
+
+export type SentryIssue = {
+  fingerprint: string;
+  projectType: ProjectTypeEnum;
+  exception: string;
+  message: string;
+  count: number;
+  countUsers: number;
+  firstSeen: string;
+  lastSeen: string;
+  releases: SentryCount[];
+  operationSystems: SentryCount[];
+  users: SentryIssueUser[];
+  granularity: SentryGranularity;
+  graphic: SentryBucket[];
+  latestEvent: SentryIssueEvent;
 };
 
 export type BaseSentryStats = {
@@ -46,65 +71,11 @@ export type BaseSentryStats = {
 
 export type BaseSentrySummary = {
   totalBugs: number;
-  bugsThisMonth: number;
-  percentageChangeMonth: number;
   bugsToday: number;
-  percentageChangeDay: number;
-  fixBugs: number;
-  percentageChangeDayFixBugs: number;
+  bugsYesterday: number;
+  bugsLast7Days: number;
+  bugsPrevious7Days: number;
+  issuesLast7Days: number;
+  usersLast7Days: number;
+  lastBugAt: string | null;
 };
-
-// Sentry
-
-export type SentryError = {
-  exception: string;
-  countUsers: number;
-  count: number;
-  graphics: SentryGraphic[];
-};
-
-export type SentryGraphic = {
-  month: string;
-  count: number;
-};
-
-export type SentryOperationSystem = {
-  count: number;
-  osType: string;
-};
-
-// Sentry BUG INFO
-
-interface Exception {
-  type: string;
-  valueData: string;
-  module: string;
-  threadId: number;
-  id: number;
-  crashed: boolean;
-  current: boolean;
-  stackTrace: StackTrace[];
-}
-
-interface StackTrace {
-  filename: string;
-  function: string;
-  lineno: number;
-  colno: number;
-  absPath: string;
-  inApp: boolean;
-  package: string;
-  instructionAddr: string;
-  addrMode: string;
-  functionId: string;
-}
-
-interface MemoryInfo {
-  allocatedBytes: number;
-  highMemoryLoadThresholdBytes: number;
-  totalAvailableMemoryBytes: number;
-  finalizationPendingCount: number;
-  compacted: boolean;
-  concurrent: boolean;
-  pauseDurations: number[];
-}

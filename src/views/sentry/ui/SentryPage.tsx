@@ -1,45 +1,43 @@
 'use client';
 
-import { useSentryStats, useSentrySummary } from '@/shared/hooks';
+import { useState } from 'react';
+
 import { DASHBOARD_PAGES } from '@/shared/routes';
 import { Breadcrumbs } from '@/shared/ui/Breadcrumbs';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 import { SentryStats } from '@/widgets/sentry-stats';
-import { SentryAnalytics } from '@/widgets/sentry-analytics';
+import { SentryAnalytics, SentryIssueFocus } from '@/widgets/sentry-analytics';
+
+type SentryTab = 'overview' | 'issues';
 
 export const SentryPage = () => {
-  const { data: chartData, isLoading } = useSentryStats();
+  const [tab, setTab] = useState<SentryTab>('overview');
+  const [focus, setFocus] = useState<SentryIssueFocus>();
 
-  const { data: summaryData, isLoading: summaryIsLoading } = useSentrySummary();
+  const openIssue = (fingerprint: string) => {
+    setFocus({ fingerprint, nonce: Date.now() });
+    setTab('issues');
+  };
 
   return (
     <>
       <Breadcrumbs
-        current={'Sentry'}
+        current="Ошибки"
         breadcrumbs={[{ value: 'Главная', path: DASHBOARD_PAGES.HOME }]}
       />
 
-      <Tabs defaultValue="stats">
-        <TabsList className="grid grid-cols-2 w-fit">
-          <TabsTrigger value="stats">Статистика</TabsTrigger>
-          <TabsTrigger value="details">Аналитика</TabsTrigger>
+      <Tabs value={tab} onValueChange={(value) => setTab(value as SentryTab)}>
+        <TabsList className="mb-4 grid w-fit grid-cols-2">
+          <TabsTrigger value="overview">Обзор</TabsTrigger>
+          <TabsTrigger value="issues">Проблемы</TabsTrigger>
         </TabsList>
-        <TabsContent value="stats">
-          <SentryStats chartData={chartData!} summaryData={summaryData!} />
+        <TabsContent value="overview">
+          <SentryStats onOpenIssue={openIssue} onOpenAll={() => setTab('issues')} />
         </TabsContent>
-        <TabsContent value="details">
-          <SentryAnalytics />
+        <TabsContent value="issues" forceMount className="data-[state=inactive]:hidden">
+          <SentryAnalytics focus={focus} />
         </TabsContent>
       </Tabs>
-
-      {/*<div className="flex gap-6 items-start">*/}
-      {/*  {data &&*/}
-      {/*    data.bugs.map(({ graphics, exception }) => (*/}
-      {/*      <div key={exception}>*/}
-      {/*        <SentryChart graphics={graphics} />*/}
-      {/*      </div>*/}
-      {/*    ))}*/}
-      {/*</div>*/}
     </>
   );
 };
