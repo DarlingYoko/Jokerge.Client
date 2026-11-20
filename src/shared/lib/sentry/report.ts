@@ -1,6 +1,12 @@
 import { formatDateTime } from './format';
 
-import { SentryIssue } from '@/shared/api/contracts/sentry/schemas';
+import { SentryIssue, SentryIssueUser } from '@/shared/api/contracts/sentry/schemas';
+
+/** "Waffle (yoko @ PC-A)" once the player is known, "yoko @ PC-A" for reports before sign-in. */
+const describeUser = (user: SentryIssueUser): string => {
+  const device = `${user.username} @ ${user.pcName}`;
+  return user.player ? `${user.player} (${device})` : device;
+};
 
 /**
  * Plain-text summary of one problem to paste into a task or a chat. IP addresses stay out of it:
@@ -23,8 +29,8 @@ export const buildIssueReport = (issue: SentryIssue): string => {
   if (issue.users.length) {
     lines.push(
       '',
-      'Устройства:',
-      ...issue.users.map((u) => `  ${u.username} @ ${u.pcName} — ${u.count}`),
+      'Игроки и устройства:',
+      ...issue.users.map((u) => `  ${describeUser(u)} — ${u.count}`),
     );
   }
 

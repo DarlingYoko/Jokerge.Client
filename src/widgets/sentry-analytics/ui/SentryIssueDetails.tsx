@@ -67,13 +67,14 @@ export const SentryIssueDetails = ({ issue }: { issue: SentryIssue }) => {
         <h4 className="text-sm font-medium">
           У кого возникает
           <span className="ml-2 font-normal text-muted-foreground">
-            пользователь Windows @ имя компьютера
+            ник в игре · пользователь Windows @ имя компьютера
           </span>
         </h4>
         <div className="rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Игрок</TableHead>
                 <TableHead>Устройство</TableHead>
                 <TableHead className="text-right">Событий</TableHead>
                 <TableHead>Последний раз</TableHead>
@@ -84,8 +85,18 @@ export const SentryIssueDetails = ({ issue }: { issue: SentryIssue }) => {
             </TableHeader>
             <TableBody>
               {issue.users.map((user) => (
-                <TableRow key={`${user.username}@${user.pcName}`}>
+                <TableRow key={`${user.player ?? ''}|${user.username}@${user.pcName}`}>
                   <TableCell className="font-medium">
+                    {user.player ?? (
+                      <span
+                        className="font-normal text-muted-foreground"
+                        title="Ошибка до входа в аккаунт или из старой версии лаунчера"
+                      >
+                        —
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell>
                     {user.username}
                     <span className="text-muted-foreground"> @ {user.pcName}</span>
                   </TableCell>
@@ -113,6 +124,7 @@ export const SentryIssueDetails = ({ issue }: { issue: SentryIssue }) => {
           <h4 className="text-sm font-medium">Стек последнего события</h4>
           <p className="text-xs text-muted-foreground">
             {formatDateTime(event.sendAt)}
+            {event.player && ` · ${event.player}`}
             {event.username && ` · ${event.username} @ ${event.pcName ?? '—'}`}
             {event.release && ` · ${event.release}`}
             {event.runtime && ` · ${event.runtime}`}

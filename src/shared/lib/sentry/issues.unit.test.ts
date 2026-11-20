@@ -29,6 +29,7 @@ describe('filterAndSortIssues', () => {
       {
         username: 'vipig',
         pcName: 'DESKTOP-9',
+        player: 'WaffleKing',
         count: 1,
         lastSeen: '',
         ipAddress: null,
@@ -53,6 +54,7 @@ describe('filterAndSortIssues', () => {
     expect(filterAndSortIssues([a, b, c], 'PROFILES', 'count')).toEqual([c]);
     expect(filterAndSortIssues([a, b, c], 'ioexception', 'count')).toEqual([c]);
     expect(filterAndSortIssues([a, b, c], 'vipig', 'count')).toEqual([c]);
+    expect(filterAndSortIssues([a, b, c], 'waffleking', 'count')).toEqual([c]);
     expect(filterAndSortIssues([a, b, c], 'desktop-9', 'count')).toEqual([c]);
     expect(filterAndSortIssues([a, b, c], '1.0.0.15', 'count')).toEqual([c]);
   });
@@ -60,9 +62,10 @@ describe('filterAndSortIssues', () => {
 
 describe('summarizeIssues', () => {
   it('counts events and distinct devices across issues', () => {
-    const user = (name: string) => ({
+    const user = (name: string, player: string | null = null) => ({
       username: name,
       pcName: 'PC',
+      player,
       count: 1,
       lastSeen: '',
       ipAddress: null,
@@ -75,5 +78,21 @@ describe('summarizeIssues', () => {
     ];
 
     expect(summarizeIssues(issues)).toEqual({ issues: 2, events: 5, devices: 2 });
+  });
+
+  it('counts two players on one computer as two', () => {
+    const user = (player: string) => ({
+      username: 'home',
+      pcName: 'PC',
+      player,
+      count: 1,
+      lastSeen: '',
+      ipAddress: null,
+      os: null,
+      release: null,
+    });
+    const issues = [issue({ users: [user('Elder'), user('Younger')] })];
+
+    expect(summarizeIssues(issues).devices).toBe(2);
   });
 });

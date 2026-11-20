@@ -21,8 +21,11 @@ export type SentryCount = { name: string; count: number };
 export type SentryBucket = { start: string; count: number };
 
 export type SentryIssueUser = {
+  /** Windows account. */
   username: string;
   pcName: string;
+  /** Minecraft nickname signed in at the time; null for reports sent before sign-in. */
+  player: string | null;
   count: number;
   lastSeen: string;
   ipAddress: string | null;
@@ -35,6 +38,7 @@ export type SentryIssueEvent = {
   sendAt: string;
   username: string | null;
   pcName: string | null;
+  player: string | null;
   ipAddress: string | null;
   os: string | null;
   runtime: string | null;

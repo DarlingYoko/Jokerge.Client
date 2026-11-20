@@ -20,8 +20,19 @@ const issue: SentryIssue = {
     {
       username: 'yoko',
       pcName: 'PC-A',
+      player: 'Waffle',
       count: 247,
       lastSeen: '2026-11-20T10:00:00Z',
+      ipAddress: null,
+      os: null,
+      release: null,
+    },
+    {
+      username: 'vipig',
+      pcName: 'PC-B',
+      player: null,
+      count: 3,
+      lastSeen: '2026-11-19T10:00:00Z',
       ipAddress: null,
       os: null,
       release: null,
@@ -34,6 +45,7 @@ const issue: SentryIssue = {
     sendAt: '2026-11-20T10:00:00Z',
     username: 'yoko',
     pcName: 'PC-A',
+    player: 'Waffle',
     ipAddress: '10.0.0.1',
     os: 'Windows 11',
     runtime: null,
@@ -51,7 +63,8 @@ describe('buildIssueReport', () => {
 
     expect(report).toContain('System.IO.IOException');
     expect(report).toContain('413');
-    expect(report).toContain('yoko @ PC-A — 247');
+    expect(report).toContain('Waffle (yoko @ PC-A) — 247');
+    expect(report).toContain('  vipig @ PC-B — 3');
     expect(report).toContain('Gml.Launcher@1.0.0.15 — 400');
     expect(report).toContain('at Crash() in B.cs:line 2');
     expect(report).not.toContain('10.0.0.1');

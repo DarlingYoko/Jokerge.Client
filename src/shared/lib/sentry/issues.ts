@@ -7,7 +7,7 @@ const matches = (issue: SentryIssue, needle: string): boolean => {
     issue.exception,
     issue.message,
     ...issue.releases.map((r) => r.name),
-    ...issue.users.flatMap((u) => [u.username, u.pcName]),
+    ...issue.users.flatMap((u) => [u.player, u.username, u.pcName]),
   ];
   return haystack.some((text) => text?.toLowerCase().includes(needle));
 };
@@ -33,7 +33,9 @@ export const filterAndSortIssues = (
  * so on very wide problems this is a lower bound.
  */
 export const summarizeIssues = (issues: SentryIssue[]) => {
-  const devices = new Set(issues.flatMap((i) => i.users.map((u) => `${u.username}@${u.pcName}`)));
+  const devices = new Set(
+    issues.flatMap((i) => i.users.map((u) => `${u.player ?? ''}|${u.username}@${u.pcName}`)),
+  );
   return {
     issues: issues.length,
     events: issues.reduce((sum, i) => sum + i.count, 0),
