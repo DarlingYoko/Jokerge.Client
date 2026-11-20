@@ -29,3 +29,7 @@ export * from '@/shared/api/contracts/notification/requests';
 // Applications
 export * from '@/shared/api/contracts/applications/schemas';
 export * from '@/shared/api/contracts/applications/requests';
+
+// Диагностика лаунчера
+export * from '@/shared/api/contracts/diagnostics/schemas';
+export * from '@/shared/api/contracts/diagnostics/requests';

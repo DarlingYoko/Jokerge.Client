@@ -6,6 +6,7 @@ import {
   NewspaperIcon,
   PieChartIcon,
   SettingsIcon,
+  StethoscopeIcon,
   Users2Icon,
 } from 'lucide-react';
 
@@ -46,6 +47,11 @@ const menu: TMenuItem[] = [
     icon: <PieChartIcon size={16} />,
     path: DASHBOARD_PAGES.SENTRY,
     text: 'Ошибки',
+  },
+  {
+    icon: <StethoscopeIcon size={16} />,
+    path: DASHBOARD_PAGES.DIAGNOSTICS,
+    text: 'Диагностика',
   },
   {
     icon: <SettingsIcon size={16} />,
