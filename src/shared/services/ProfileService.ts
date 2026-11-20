@@ -109,7 +109,7 @@ class ProfileService {
     ...params
   }: TAddPlayerToProfileRequest): Promise<AxiosResponse<TAddPlayerToProfileResponse>> {
     return await $api.post<TAddPlayerToProfileResponse>(
-      `${this.BASE_URL}/${profileName}/players/whitelist/${params.userUuid}`,
+      `${this.BASE_URL}/${encodeURIComponent(profileName)}/players/whitelist/${params.userUuid}`,
       {
         params,
       },
@@ -124,7 +124,7 @@ class ProfileService {
     playerUuid: string;
   }): Promise<AxiosResponse<TDeletePlayerToProfileResponse>> {
     return await $api.delete<TDeletePlayerToProfileResponse>(
-      `${this.BASE_URL}/${profileName}/players/whitelist/${playerUuid}`,
+      `${this.BASE_URL}/${encodeURIComponent(profileName)}/players/whitelist/${playerUuid}`,
     );
   }
 

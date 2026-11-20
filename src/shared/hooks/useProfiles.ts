@@ -230,16 +230,14 @@ export const useDeleteProfiles = () => {
   });
 };
 
-export const useAddProfilePlayers = (profileName?: string) => {
-  const queryClient = useQueryClient();
-
+// The profile name stays in the signature for callers; the request body carries it.
+export const useAddProfilePlayers = (_profileName?: string) => {
   return useMutation({
     mutationKey: profileKeys.addingPlayers(),
     mutationFn: (body: TAddPlayerToProfileRequest) => profileService.addPlayer(body),
+    // The players list is updated in place (gamePlayerStore); refetching the profile would rebuild
+    // its whole file list on the server for every added player.
     onSuccess: async (data) => {
-      await queryClient.invalidateQueries({
-        queryKey: [...profileKeys.reading(), { profileName: profileName }],
-      });
       toast.success('Успешно', {
         description: data.data.message,
       });

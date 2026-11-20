@@ -60,7 +60,7 @@ export const ProfilePage = ({ params }: { params: { name: string } }) => {
         }
       : undefined,
   );
-  const { setPlayers } = useGamePlayerStore();
+  const setPlayers = useGamePlayerStore((state) => state.setPlayers);
   const profile = data?.data.data;
   const router = useRouter();
   const searchParams = useSearchParams();
