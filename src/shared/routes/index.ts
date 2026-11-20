@@ -15,6 +15,7 @@ export const DASHBOARD_PAGES = {
   PROFILE: '/dashboard/profile',
   SENTRY: '/dashboard/sentry',
   DIAGNOSTICS: '/dashboard/diagnostics',
+  METRICS: '/dashboard/metrics',
   PLAYERS: '/dashboard/players',
   NEWS: '/dashboard/news',
 };

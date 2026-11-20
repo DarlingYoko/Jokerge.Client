@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import {
+  ActivityIcon,
   ArrowUpDownIcon,
   BlocksIcon,
   NewspaperIcon,
@@ -52,6 +53,11 @@ const menu: TMenuItem[] = [
     icon: <StethoscopeIcon size={16} />,
     path: DASHBOARD_PAGES.DIAGNOSTICS,
     text: 'Диагностика',
+  },
+  {
+    icon: <ActivityIcon size={16} />,
+    path: DASHBOARD_PAGES.METRICS,
+    text: 'Метрики',
   },
   {
     icon: <SettingsIcon size={16} />,
