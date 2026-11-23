@@ -9,6 +9,7 @@ export const ModDetailsEntitySchema = z.object({
   .string()
   .min(2, { message: 'Описание мода должно быть больше 2 символов' })
   .max(1000, { message: 'Описание мода не должно быть больше 1000 символов' }),
+  dependencies: z.array(z.string()),
 });
 
 export const CreateProfileSchema = z.object({

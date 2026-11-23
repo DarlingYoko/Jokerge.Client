@@ -189,9 +189,14 @@ export const GameMods = ({ profile }: GameServersParams) => {
           <Table className="border border-dashed rounded-2xl overflow-x-hidden">
             <TableBody>
               {filteredOptionalMods && detailsMods && filteredOptionalMods.length > 0 ? (
-                filteredOptionalMods.map((mod, index) => (
-                  <TableRow key={index}>
-                    <GameModItem mod={mod} details={detailsMods} profile={profile}/>
+                filteredOptionalMods.map((mod) => (
+                  <TableRow key={mod.name}>
+                    <GameModItem
+                      mod={mod}
+                      details={detailsMods}
+                      profile={profile}
+                      optionalMods={optionalMods ?? []}
+                    />
                   </TableRow>
                 ))
               ) : (

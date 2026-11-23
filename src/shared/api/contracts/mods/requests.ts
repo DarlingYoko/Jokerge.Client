@@ -20,6 +20,7 @@ export type TPutModOptionalRequest = {
   key: string;
   title: string;
   description: string;
+  dependencies: string[];
 };
 export type TPutModOptionalResponse = ResponseBaseEntity & {};
 

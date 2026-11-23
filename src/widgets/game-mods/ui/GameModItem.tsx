@@ -1,6 +1,6 @@
 import { FileIcon } from '@radix-ui/react-icons';
 import React from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { ModBaseEntity, ModDetailsEntity } from '@/shared/api/contracts/mods/schemas';
@@ -18,22 +18,32 @@ import {
 } from '@/shared/api/contracts';
 import { useRemoveProfileMod } from '@/shared/hooks';
 import { usePutModDetails } from '@/shared/hooks/useMods';
+import { MultiSelect } from '@/shared/ui/multi-select';
+import { dependencyOptions, modKey, requiredBy } from '@/shared/lib/mods/dependencies';
 
 interface GameModItemType {
   mod: ModBaseEntity;
   profile: ProfileExtendedBaseEntity;
   details: Record<string, ModDetailsEntity>;
+  /** All optional mods of the profile: the ones this mod may depend on. */
+  optionalMods: ModBaseEntity[];
 }
 
-export const GameModItem = ({ mod, profile, details }: GameModItemType) => {
+export const GameModItem = ({ mod, profile, details, optionalMods }: GameModItemType) => {
   const { mutateAsync: removeModMutate } = useRemoveProfileMod();
   const { mutateAsync: putModMutate } = usePutModDetails();
+
+  const key = modKey(mod.name);
+  const saved = details[key];
+  const options = dependencyOptions(optionalMods, details, key);
+  const neededBy = requiredBy(optionalMods, details, key);
 
   const form = useForm<ModDetailsEntitySchemaType>({
     resolver: zodResolver(ModDetailsEntitySchema),
     defaultValues: {
-      description: undefined,
-      title: undefined,
+      title: saved?.title ?? '',
+      description: saved?.description ?? '',
+      dependencies: saved?.dependencies ?? [],
     },
   });
 
@@ -45,10 +55,12 @@ export const GameModItem = ({ mod, profile, details }: GameModItemType) => {
     body: ModDetailsEntitySchemaType,
   ) => {
     await putModMutate({
-      key: `${mod.name}.jar`,
+      key,
       title: body.title,
       description: body.description,
+      dependencies: body.dependencies,
     });
+    form.reset(body);
   };
 
   return (
@@ -80,7 +92,6 @@ export const GameModItem = ({ mod, profile, details }: GameModItemType) => {
                     className=" p-0 text-md text-black dark:text-white bg-transparent shadow-none border-none"
                     style={{ boxShadow: 'none' }}
                     type="text"
-                    defaultValue={details[`${mod?.name}.jar`]?.title}
                     {...form.register('title')}
                     placeholder="Введите наименование"
                   />
@@ -97,7 +108,6 @@ export const GameModItem = ({ mod, profile, details }: GameModItemType) => {
                   <Textarea
                     className="p-0 pt-2 text-md text-black dark:text-white bg-transparent shadow-none border-none"
                     style={{ boxShadow: 'none' }}
-                    defaultValue={details[`${mod?.name}.jar`]?.description}
                     {...form.register('description')}
                     placeholder="Введите описание"
                   />
@@ -105,6 +115,34 @@ export const GameModItem = ({ mod, profile, details }: GameModItemType) => {
                     <FormMessage>
                       {form.formState.errors.description.message?.toString()}
                     </FormMessage>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 mt-3">
+                  <div className="border-t border-dashed w-[20px] h-[1px]"></div>
+                  <h3 className="text-gray-700 dark:text-gray-300">Зависимости</h3>
+                </div>
+                <div className="flex flex-col gap-1 pl-7 pr-2">
+                  <Controller
+                    control={form.control}
+                    name="dependencies"
+                    render={({ field }) => (
+                      <MultiSelect
+                        options={options}
+                        onValueChange={(value) => field.onChange(value)}
+                        defaultValue={field.value}
+                        placeholder={
+                          options.length > 0 ? 'Нет зависимостей' : 'Нет других опциональных модов'
+                        }
+                        disabled={options.length === 0 && field.value.length === 0}
+                        maxCount={3}
+                      />
+                    )}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Включаются в лаунчере вместе с этим модом, игрок не может их выключить.
+                  </p>
+                  {neededBy.length > 0 && (
+                    <p className="text-xs text-muted-foreground">Нужен для: {neededBy.join(', ')}</p>
                   )}
                 </div>
                 <div className="flex items-center gap-2">

@@ -54,6 +54,8 @@ export const usePutModDetails = () => {
     mutationFn: (data: TPutModOptionalRequest) => modService.putModDetails(data),
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: profileKeys.all });
+      // The other mods' dependency pickers read these details.
+      await queryClient.invalidateQueries({ queryKey: modsKeys.modsDetails() });
       toast.success('Успешно', {
         description: `Модификация успешно обновлена`,
       });

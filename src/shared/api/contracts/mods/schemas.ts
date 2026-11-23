@@ -21,6 +21,8 @@ export type ModDetailsEntity = {
   key: string;
   title: string;
   description: string;
+  /** Keys of the optional mods this one needs; the launcher turns them on together with it. */
+  dependencies?: string[];
 };
 
 export type ModInfoEntity = {
