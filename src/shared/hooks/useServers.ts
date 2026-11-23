@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 
 import { gameServerService } from '@/shared/services/GameServerService';
 import {
+  TCheckGameServersRequest,
   TDeleteGameServersRequest,
   TGetGameServersRequest,
   TPostGameServersRequest,
@@ -17,6 +18,7 @@ export const serversKeys = {
   editing: () => [...serversKeys.all, 'editing'] as const,
   deleting: () => [...serversKeys.all, 'deleting'] as const,
   deletingAll: () => [...serversKeys.all, 'deletingAll'] as const,
+  checking: () => [...serversKeys.all, 'checking'] as const,
 
   entities: () => [...serversKeys.all, 'entities'] as const,
 };
@@ -88,6 +90,22 @@ export const useUpdateGameServer = () => {
     },
     onError: (error) => {
       isAxiosError({ toast, error });
+    },
+  });
+};
+
+export const useCheckGameServers = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: serversKeys.checking(),
+    mutationFn: (data: TCheckGameServersRequest) => gameServerService.checkServers(data),
+    onSuccess: (data) => {
+      // The check already returns the fresh list, so put it into the cache instead of refetching.
+      queryClient.setQueryData(serversKeys.entities(), data);
+    },
+    onError: (error) => {
+      isAxiosError({ toast, error, customDescription: 'Не удалось проверить серверы' });
     },
   });
 };

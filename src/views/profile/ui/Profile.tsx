@@ -277,7 +277,7 @@ export const ProfilePage = ({ params }: { params: { name: string } }) => {
         <TabsContent value="servers" className={classes.tabs__content}>
           <Section
             title="Сервера"
-            subtitle="Добавление серверов, для вывода онлайна в лаунчере, можно использовать домены, srv записи и IP адреса"
+            subtitle="Точки входа в игру: домены, srv записи и IP адреса. Первый сервер — основной адрес, его игроки видят в списке серверов Minecraft. Остальные — альтернативные входы (мосты, другие домены), которые игрок может выбрать в лаунчере. Статус и пинг измеряются с сервера API, а не с компьютера игрока."
           >
             <GameServers profile={profile} />
           </Section>

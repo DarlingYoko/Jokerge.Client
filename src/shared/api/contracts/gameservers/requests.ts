@@ -34,3 +34,8 @@ export type TPutGameServersRequest = {
 export type TPutGameServersResponse = ResponseBaseEntity & {
   data: GameServerBaseEntity;
 };
+
+export type TCheckGameServersRequest = {
+  profileName: string;
+};
+export type TCheckGameServersResponse = TGetGameServersResponse;

@@ -1,5 +1,7 @@
 import { $api } from '@/services/api.service';
 import {
+  TCheckGameServersRequest,
+  TCheckGameServersResponse,
   TDeleteGameServersRequest,
   TDeleteGameServersResponse,
   TGetGameServersRequest,
@@ -15,6 +17,17 @@ class GameServerService {
 
   async getServers({ profileName }: TGetGameServersRequest): Promise<TGetGameServersResponse> {
     const { data } = await $api.get<TGetGameServersResponse>(`${this.BASE_URL}/${profileName}`);
+
+    return data;
+  }
+
+  /** Pings every server of the profile right now (up to ~5 s) and returns the fresh list. */
+  async checkServers({
+    profileName,
+  }: TCheckGameServersRequest): Promise<TCheckGameServersResponse> {
+    const { data } = await $api.post<TCheckGameServersResponse>(
+      `${this.BASE_URL}/${profileName}/check`,
+    );
 
     return data;
   }
